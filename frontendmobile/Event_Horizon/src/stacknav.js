@@ -9,6 +9,7 @@ import NavBar from './Components/navbar';
 import BNavBar from './Components/bottomnavbar';
 import Xyz from './Drawer/Drawernav';
 import DetailedEventPage from './Screens/DetailedEventPage';
+import EditEventPage from './Screens/EditEvent';
 
 const Stack = createNativeStackNavigator();
 
@@ -24,6 +25,7 @@ const Stacknav = () => {
                 <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
                 <Stack.Screen name="EHome" component={EHome} options={{ headerShown: false }} />
                 <Stack.Screen name="DetailedEvent" component={DetailedEventPage} options={{ headerShown: false }} />
+                <Stack.Screen name="EditEvent" component={EditEventPage} options={{ headerShown: false }} />
             </Stack.Navigator>
         </NavigationContainer>
     );

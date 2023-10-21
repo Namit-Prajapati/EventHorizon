@@ -41,6 +41,7 @@ const styles = StyleSheet.create({
         fontSize: mobileW * 0.035,
         fontWeight: '600',
         marginHorizontal: mobileW * 0.02,
+        marginRight: mobileW * 0.1,
     }
 });
 

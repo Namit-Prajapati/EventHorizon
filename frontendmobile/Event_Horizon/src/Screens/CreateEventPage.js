@@ -22,9 +22,15 @@ const dummyClubs = [
 ];
 
 const dummyCheckbox = [ // Dummy data array for eligibility options
-    { label: 'Option 1', checked: false },
-    { label: 'Option 2', checked: false },
-    { label: 'Option 3', checked: false },
+    { label: 'CSE', checked: false },
+    { label: 'IT', checked: false },
+    { label: 'CSIT', checked: false },
+    { label: 'CS-DS', checked: false },
+    { label: 'CS-IOT', checked: false },
+    { label: 'CS-AIML', checked: false },
+    { label: 'EC', checked: false },
+    { label: 'ME', checked: false },
+    { label: 'CIVIL', checked: false },
 ];
 
 const CreateEventPage = () => {
@@ -34,6 +40,7 @@ const CreateEventPage = () => {
     const [logoImage, setLogoImage] = useState(null);
     const [eventPoster, setEventPoster] = useState(null);
     const [eligibility, setEligibility] = useState(dummyCheckbox);
+    const [eligibilityAr, setEligibilityAr] = useState(dummyCheckbox);
     const [selectedVenue, setSelectedVenue] = useState(dummyVenues[0].value);
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
@@ -46,6 +53,19 @@ const CreateEventPage = () => {
 
     // console.log("formattedToday " + formattedToday);
     // console.log("Start date " + startDate);
+
+    const HandleSubmit = () => {
+        let temp = "";
+        eligibility.forEach(dept => {
+            if (dept.checked) {
+                if (temp) {
+                    temp += ",";
+                }
+                temp += dept.label;
+            }
+        });
+    }
+
 
     const selectImage = (type) => {
         const options = {
@@ -180,16 +200,18 @@ const CreateEventPage = () => {
             )}
 
             <Text style={styles.label}>Eligibility:</Text>
-            {eligibility.map((item, index) => (
-                <View key={index} style={styles.checkboxContainer}>
-                    <Text style={styles.checkboxLabel}>{item.label}</Text>
-                    <CheckBox
-                        value={item.checked}
-                        onValueChange={() => toggleCheckBox(index)}
-                        tintColors={{ true: 'rgba(62, 168, 232, 1)', false: 'rgba(62, 168, 232, 1)' }}
-                    />
-                </View>
-            ))}
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', margin: mobileW * 0.04, }}>
+                {eligibility.map((item, index) => (
+                    <View key={index} style={styles.checkboxContainer}>
+                        <Text style={styles.checkboxLabel}>{item.label}</Text>
+                        <CheckBox
+                            value={item.checked}
+                            onValueChange={() => toggleCheckBox(index)}
+                            tintColors={{ true: 'rgba(62, 168, 232, 1)', false: 'rgba(62, 168, 232, 1)' }}
+                        />
+                    </View>
+                ))}
+            </View>
 
             {/* Select venue from picker dropdown */}
             <Text style={styles.label}>Select Venue</Text>
@@ -351,12 +373,12 @@ const styles = StyleSheet.create({
     checkboxContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 10,
-        justifyContent: 'center'
+        justifyContent: 'center',
+        marginRight: 20
     },
     checkboxLabel: {
         color: 'black',
-        marginRight: 10,
+        marginRight: 2,
     },
 });
 
