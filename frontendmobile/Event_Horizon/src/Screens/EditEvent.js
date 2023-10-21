@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Dimensions, Image, ScrollView, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, Image, ScrollView, TextInput, TouchableOpacity, PermissionsAndroid } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
@@ -7,6 +7,7 @@ import { Calendar } from 'react-native-calendars';
 import CheckBox from '@react-native-community/checkbox';
 import { launchImageLibrary } from 'react-native-image-picker';
 import DocumentPicker from 'react-native-document-picker';
+import ImagePicker from 'react-native-image-crop-picker';
 
 
 let mobileW = Dimensions.get('window').width;
@@ -37,6 +38,7 @@ const EditEventPage = ({ route }) => {
     const [eventPoster, setEventPoster] = useState({ uri: item.Banner });
     const [description, setDescription] = useState(item.Description);
     const [selectedFile, setSelectedFile] = useState(null);
+    const [selectedImages, setSelectedImages] = useState([]);
 
 
     useEffect(() => {
@@ -48,6 +50,11 @@ const EditEventPage = ({ route }) => {
         // Find the selected venue's booked dates
         console.log(selectedFile);
     }, [selectedFile]);
+
+    useEffect(() => {
+        // Find the selected venue's booked dates
+        console.log(selectedImages);
+    }, [selectedImages]);
 
     const toggleCheckBox = (index) => {
         const updatedEligibility = [...eligibility];
@@ -68,6 +75,19 @@ const EditEventPage = ({ route }) => {
             } else {
                 throw err;
             }
+        }
+    };
+
+    const pickImages = async () => {
+        try {
+            const images = await ImagePicker.openPicker({
+                multiple: true,
+                mediaType: 'photo',
+            });
+
+            setSelectedImages(images);
+        } catch (error) {
+            console.log(error);
         }
     };
 
@@ -197,7 +217,23 @@ const EditEventPage = ({ route }) => {
                 <TouchableOpacity style={styles.fileInputButton} onPress={pickDocument}>
                     <Text style={styles.fileInputText}>Choose File</Text>
                 </TouchableOpacity>
+                {
+                    selectedFile ?
+                        <View>
+                            <Text style={styles.label}>Selected File</Text>
+                            <Text style={styles.selectedfile}>{selectedFile[0].name}</Text>
+                        </View>
+                        : null}
+                <Text style={styles.label}>Event Images:</Text>
+                <TouchableOpacity onPress={pickImages} style={styles.fileInputButton}>
+                    <Text>Select</Text>
+                </TouchableOpacity>
 
+                <View style={styles.imageContainer}>
+                    {selectedImages.map((image, index) => (
+                        <Image key={index} source={{ uri: image.path }} style={styles.imagePreviewx} />
+                    ))}
+                </View>
 
             </ScrollView>
         </View>
@@ -286,6 +322,27 @@ const styles = StyleSheet.create({
         height: mobileW,
         resizeMode: 'cover',
         alignSelf: 'center',
+    },
+    selectedfile: {
+        marginTop: 5,
+        color: 'black',
+        margin: mobileW * 0.04,
+        backgroundColor: 'rgba(62, 168, 232, 1)',
+        padding: 5,
+        borderRadius: 5,
+    },
+    imageContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    imagePreviewx: {
+        width: 100,
+        height: 100,
+        resizeMode: 'cover',
+        marginRight: 10,
+        marginBottom: 10,
     },
 });
 
