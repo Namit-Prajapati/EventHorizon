@@ -6,6 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Calendar } from 'react-native-calendars';
 import CheckBox from '@react-native-community/checkbox';
 import { launchImageLibrary } from 'react-native-image-picker';
+import DocumentPicker from 'react-native-document-picker';
 
 
 let mobileW = Dimensions.get('window').width;
@@ -35,6 +36,7 @@ const EditEventPage = ({ route }) => {
     const [eligibility, setEligibility] = useState(dummyCheckbox);
     const [eventPoster, setEventPoster] = useState({ uri: item.Banner });
     const [description, setDescription] = useState(item.Description);
+    const [selectedFile, setSelectedFile] = useState(null);
 
 
     useEffect(() => {
@@ -42,10 +44,31 @@ const EditEventPage = ({ route }) => {
         console.log(eventPoster);
     }, [eventPoster]);
 
+    useEffect(() => {
+        // Find the selected venue's booked dates
+        console.log(selectedFile);
+    }, [selectedFile]);
+
     const toggleCheckBox = (index) => {
         const updatedEligibility = [...eligibility];
         updatedEligibility[index].checked = !updatedEligibility[index].checked;
         setEligibility(updatedEligibility);
+    };
+
+
+    const pickDocument = async () => {
+        try {
+            const result = await DocumentPicker.pick({
+                type: [DocumentPicker.types.allFiles],
+            });
+            setSelectedFile(result);
+        } catch (err) {
+            if (DocumentPicker.isCancel(err)) {
+                // User cancelled the picker
+            } else {
+                throw err;
+            }
+        }
     };
 
     const selectImage = (type) => {
@@ -169,6 +192,12 @@ const EditEventPage = ({ route }) => {
                     placeholder={'Enter Event Description'}
                     placeholderTextColor={'rgba(0,0,0,0.5)'}
                 />
+
+                <Text style={styles.label}>Upload Event Report:</Text>
+                <TouchableOpacity style={styles.fileInputButton} onPress={pickDocument}>
+                    <Text style={styles.fileInputText}>Choose File</Text>
+                </TouchableOpacity>
+
 
             </ScrollView>
         </View>
