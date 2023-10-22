@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, Image, StyleSheet, TouchableOpacity, ScrollView, Dimensions, FlatList } from 'react-native';
 import ImagePicker from 'react-native-image-crop-picker';
-
+import { API_IP } from "@env";
+import { useNavigation } from '@react-navigation/native';
 
 const mobileW = Dimensions.get('window').width;
 
 const CreateVenuePage = () => {
+
+    const navigator = useNavigation();
+
     const [venueName, setVenueName] = useState('');
     const [venueDescription, setVenueDescription] = useState('');
     const [capacity, setCapacity] = useState('');
@@ -32,13 +36,13 @@ const CreateVenuePage = () => {
 
     const sendDataToAPI = async () => {
         console.log('Create Venue');
-        console.log(selectedImages[0].path);
-        console.log(selectedImages[0].mime);
-        console.log(`Image.${selectedImages[0].mime.split("/")[1]}`);
+        // console.log(selectedImages[0].path);
+        // console.log(selectedImages[0].mime);
+        // console.log(`Image.${selectedImages[0].mime.split("/")[1]}`);
         // console.log(venueDescription);
         // console.log(capacity);
 
-        const apiUrl = `http://16.16.202.127:4000/admin/addvenue`;
+        const apiUrl = `${API_IP}admin/addvenue`;
         const formData = new FormData();
 
         formData.append('name', venueName);
@@ -49,7 +53,7 @@ const CreateVenuePage = () => {
             formData.append(`image`, {
                 uri: image.path,
                 type: image.mime,
-                name: `image.${image.mime.split("/")[1]}`
+                name: `image${index}.${image.mime.split("/")[1]}`
             });
         });
 
@@ -65,10 +69,21 @@ const CreateVenuePage = () => {
             .then((Response) => Response.json())
             .then((json) => {
                 console.log(json);
+                if (json.message) {
+                    alert(json.message);
+                    setVenueName('');
+                    setVenueDescription('');
+                    setCapacity('');
+                    setSelectedImages([]);
+                    navigator.navigate('Home');
+                }
+                if (json.error) {
+                    alert(json.error);
+                }
             })
-            .catch((error) => {
-                console.log(error);
-            })
+        // .catch((error) => {
+        //     console.log(error);
+        // })
 
     };
 
@@ -110,8 +125,8 @@ const CreateVenuePage = () => {
             />
 
             <Text style={styles.label}>Venue Images:</Text>
-            <TouchableOpacity onPress={pickImages} style={styles.fileInputButton}>
-                <Text>Select</Text>
+            <TouchableOpacity style={styles.fileInputButton} onPress={pickImages}>
+                <Text style={styles.fileInputText}>Choose Files</Text>
             </TouchableOpacity>
 
             <View style={styles.imageContainer}>

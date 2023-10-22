@@ -1,16 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, Image, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, RefreshControl, Image, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { API_IP } from "@env";
 
 let mobileW = Dimensions.get('window').width;
 
 const ListVenuePage = ({ route }) => {
-
     const navigation = useNavigation();
 
+    const [refreshing, setRefreshing] = useState(false);
     const [data, setData] = useState(null);
-    const longString = "This is a long string that you want to truncate to the first 100 characters. Here's the rest of the text.";
 
+    const onRefresh = React.useCallback(() => {
+        setRefreshing(true);
+        console.log("hello");
+        fetchData();
+        setTimeout(() => {
+            setRefreshing(false);
+        }, 1000);
+    }, []);
 
     useEffect(() => {
         fetchData();
@@ -21,8 +29,9 @@ const ListVenuePage = ({ route }) => {
     }, [data]);
 
     const fetchData = async () => {
+        console.log("hello this is fetch");
         try {
-            const response = await fetch('http://16.16.202.127:4000/admin/getallvenue/'); // Replace with your API endpoint
+            const response = await fetch(API_IP + 'admin/getallvenue/'); // Replace with your API endpoint
             const result = await response.json();
 
             setData(result.venues);
@@ -49,6 +58,12 @@ const ListVenuePage = ({ route }) => {
                                 </View>
                             </TouchableOpacity>
                         )}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={refreshing}
+                                onRefresh={onRefresh}
+                            />
+                        }
                     /> :
                     null
             }
