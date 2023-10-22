@@ -8,6 +8,7 @@ import EventPage from '../Screens/EventPage';
 import DetailedEventPage from '../Screens/DetailedEventPage';
 import CreateEventPage from '../Screens/CreateEventPage';
 import CreateVenuePage from '../Screens/CreateVenue';
+import ListVenuePage from '../Screens/ListVenuePage';
 const Drawer = createDrawerNavigator();
 const Xyz = ({ navigation }) => {
     return (
@@ -36,6 +37,13 @@ const Xyz = ({ navigation }) => {
             <Drawer.Screen
                 name="CreateVenuePage"
                 component={CreateVenuePage}
+                options={{
+                    header: () => <NavBar />,
+                }}
+            />
+            <Drawer.Screen
+                name="ListVenuePage"
+                component={ListVenuePage}
                 options={{
                     header: () => <NavBar />,
                 }}
