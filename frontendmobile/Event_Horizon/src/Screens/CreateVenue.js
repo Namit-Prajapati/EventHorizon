@@ -1,10 +1,4 @@
-// Create venue
-// Venue name
-// Disc
-// Capicity
-// Venue images
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, Image, StyleSheet, TouchableOpacity, ScrollView, Dimensions, FlatList } from 'react-native';
 import ImagePicker from 'react-native-image-crop-picker';
 
@@ -29,6 +23,55 @@ const CreateVenuePage = () => {
             console.log(error);
         }
     };
+
+    useEffect(() => {
+        // Find the selected venue's booked dates
+        console.log(selectedImages);
+
+    }, [selectedImages]);
+
+    const sendDataToAPI = async () => {
+        console.log('Create Venue');
+        console.log(selectedImages[0].path);
+        console.log(selectedImages[0].mime);
+        console.log(`Image.${selectedImages[0].mime.split("/")[1]}`);
+        // console.log(venueDescription);
+        // console.log(capacity);
+
+        const apiUrl = `http://16.16.202.127:4000/admin/addvenue`;
+        const formData = new FormData();
+
+        formData.append('name', venueName);
+        formData.append('description', venueDescription);
+        formData.append('capacity', capacity);
+
+        selectedImages.forEach((image, index) => {
+            formData.append(`image`, {
+                uri: image.path,
+                type: image.mime,
+                name: `image.${image.mime.split("/")[1]}`
+            });
+        });
+
+
+        await fetch(apiUrl, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        })
+
+            .then((Response) => Response.json())
+            .then((json) => {
+                console.log(json);
+            })
+            .catch((error) => {
+                console.log(error);
+            })
+
+    };
+
 
     return (
         <ScrollView style={styles.container}>
@@ -77,9 +120,7 @@ const CreateVenuePage = () => {
                 ))}
             </View>
             <TouchableOpacity style={styles.Button}
-                onPress={() => {
-
-                }}
+                onPress={sendDataToAPI}
             >
                 <Text style={{
                     fontWeight: 'bold',
