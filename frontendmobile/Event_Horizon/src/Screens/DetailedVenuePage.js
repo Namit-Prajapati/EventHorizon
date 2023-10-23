@@ -174,7 +174,7 @@ const DetailedVenuePage = ({ route }) => {
                     }} />
                     <Text style={[styles.lable, {}]}>Available Dates :</Text>
                 </View>
-                <Calendar
+                <Calendar 
                     enableSwipeMonths
                     style={{
                         borderWidth: 2,

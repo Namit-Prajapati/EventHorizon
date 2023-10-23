@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, Image, StyleSheet, TouchableOpacity, ScrollView, Dimensions, FlatList } from 'react-native';
+import { View, Text, TextInput, Button, Image, StyleSheet, TouchableOpacity, ScrollView, Dimensions, FlatList, ActivityIndicator } from 'react-native';
 import ImagePicker from 'react-native-image-crop-picker';
 import { API_IP } from "@env";
 import { useNavigation } from '@react-navigation/native';
@@ -14,6 +14,7 @@ const CreateVenuePage = () => {
     const [venueDescription, setVenueDescription] = useState('');
     const [capacity, setCapacity] = useState('');
     const [selectedImages, setSelectedImages] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     const pickImages = async () => {
         try {
@@ -35,6 +36,7 @@ const CreateVenuePage = () => {
     }, [selectedImages]);
 
     const sendDataToAPI = async () => {
+        setIsLoading(true);
         console.log('Create Venue');
         // console.log(selectedImages[0].path);
         // console.log(selectedImages[0].mime);
@@ -81,10 +83,9 @@ const CreateVenuePage = () => {
                     alert(json.error);
                 }
             })
-        // .catch((error) => {
-        //     console.log(error);
-        // })
-
+            .finally(() => {
+                setIsLoading(false); // Set loading state to false when API call is complete
+            });
     };
 
 
@@ -137,11 +138,16 @@ const CreateVenuePage = () => {
             <TouchableOpacity style={styles.Button}
                 onPress={sendDataToAPI}
             >
-                <Text style={{
-                    fontWeight: 'bold',
-                    fontSize: mobileW * .05,
-                    color: 'white'
-                }}>Create Venue</Text>
+                {isLoading ? (
+                    <ActivityIndicator size="small" color="white" /> // Show the progress indicator when loading
+                ) : (
+                    <Text style={{
+                        fontWeight: 'bold',
+                        fontSize: mobileW * .05,
+                        color: 'white'
+                    }}>Create Venue</Text>
+                )}
+
             </TouchableOpacity>
         </ScrollView>
     );
