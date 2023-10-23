@@ -11,6 +11,7 @@ import Xyz from './Drawer/Drawernav';
 import DetailedEventPage from './Screens/DetailedEventPage';
 import EditEventPage from './Screens/EditEvent';
 import DetailedVenuePage from './Screens/DetailedVenuePage';
+import EditVenuePage from './Screens/EditVenuePage';
 
 const Stack = createNativeStackNavigator();
 
@@ -28,6 +29,7 @@ const Stacknav = () => {
                 <Stack.Screen name="DetailedEvent" component={DetailedEventPage} options={{ headerShown: false }} />
                 <Stack.Screen name="EditEvent" component={EditEventPage} options={{ headerShown: false }} />
                 <Stack.Screen name="DetailedVenuePage" component={DetailedVenuePage} options={{ headerShown: false }} />
+                <Stack.Screen name="EditVenuePage" component={EditVenuePage} options={{ headerShown: false }} />
             </Stack.Navigator>
         </NavigationContainer>
     );

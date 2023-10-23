@@ -5,6 +5,7 @@ import { Calendar } from 'react-native-calendars';
 import { API_IP } from "@env";
 import { useNavigation } from '@react-navigation/native';
 import EventCard from '../Components/EventCard';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 let mobileW = Dimensions.get('window').width;
 
@@ -109,7 +110,7 @@ const DetailedVenuePage = ({ route }) => {
     useEffect(() => {
         setMarkedDates(
             item.bookedOn.reduce((result, date) => {
-                result[date.split('T')[0]] = { selected: true, selectedColor: 'red' };
+                result[date.split('T')[0]] = { selected: true, selectedColor: 'rgba(62, 168, 232,1)' };
                 return result;
             }, {}))
         console.log("check");
@@ -128,88 +129,111 @@ const DetailedVenuePage = ({ route }) => {
     }, []);
 
     return (
-        <ScrollView style={styles.container}>
-            <Text style={styles.header}>{item.name} </Text>
-            {
-                VenueImages ? <View style={[styles.ContainerX, { height: mobileW * 0.9, }]}>
-                    <ImageViewer
-                        imageUrls={VenueImages}
-                        enableSwipeDown
+        <View style={styles.container}>
+
+            <ScrollView style={styles.container}>
+                <Text style={styles.header}>{item.name} </Text>
+                {
+                    VenueImages ? <View style={[styles.ContainerX, { height: mobileW * 0.9, }]}>
+                        <ImageViewer
+                            imageUrls={VenueImages}
+                            enableSwipeDown
+                        />
+                    </View> : null
+                }
+                <View style={[styles.ContainerX, { flexDirection: 'row', alignContent: 'center', padding: 10 }]}>
+                    <View style={{
+                        backgroundColor: 'rgba(62, 168, 232,1)',
+                        height: 35,
+                        width: 8,
+                        // position: 'absolute',
+                        // marginTop: '200'
+                        marginLeft: -10
+                    }} />
+                    <Text style={[styles.lable, { alignSelf: 'center' }]}>Capacity :</Text>
+                    <Text style={[styles.lableDescription, { alignSelf: 'center', marginHorizontal: mobileW * 0.005, }]}>{item.capacity} </Text>
+                </View>
+                <View style={[styles.ContainerX, { alignContent: 'center', padding: 10 }]}>
+                    <View style={{ flexDirection: 'row' }}>
+                        <View style={{
+                            backgroundColor: 'rgba(62, 168, 232,1)',
+                            height: 30,
+                            width: 8,
+                            position: 'absolute',
+                            marginLeft: -10
+                        }} />
+                        <Text style={[styles.lable, {}]}>Description :</Text>
+                    </View>
+                    <Text style={[styles.lableDescription, { alignSelf: 'center', marginTop: 10 }]}>{item.description} </Text>
+                </View>
+                <View style={[styles.ContainerX, { alignContent: 'center', padding: 10 }]}>
+                    <View style={{ flexDirection: 'row' }}>
+                        <View style={{
+                            backgroundColor: 'rgba(62, 168, 232,1)',
+                            height: 30,
+                            width: 8,
+                            position: 'absolute',
+                            marginLeft: -10
+                        }} />
+                        <Text style={[styles.lable, {}]}>Booked Dates :</Text>
+                    </View>
+                    <Calendar
+                        enableSwipeMonths
+                        style={{
+                            borderWidth: 2,
+                            borderColor: 'gray',
+                            margin: mobileW * 0.04,
+                            borderRadius: 5,
+                        }}
+                        markedDates={{ ...markedDates }}
+                        minDate={formattedToday}
+                    // maxDate={startDate}
                     />
-                </View> : null
-            }
-            <View style={[styles.ContainerX, { flexDirection: 'row', alignContent: 'center', padding: 10 }]}>
-                <View style={{
-                    backgroundColor: 'rgba(62, 168, 232,1)',
-                    height: 35,
-                    width: 8,
-                    // position: 'absolute',
-                    // marginTop: '200'
-                    marginLeft: -10
-                }} />
-                <Text style={[styles.lable, { alignSelf: 'center' }]}>Capacity :</Text>
-                <Text style={[styles.lableDescription, { alignSelf: 'center', marginHorizontal: mobileW * 0.005, }]}>{item.capacity} </Text>
-            </View>
-            <View style={[styles.ContainerX, { alignContent: 'center', padding: 10 }]}>
-                <View style={{ flexDirection: 'row' }}>
-                    <View style={{
-                        backgroundColor: 'rgba(62, 168, 232,1)',
-                        height: 30,
-                        width: 8,
-                        position: 'absolute',
-                        marginLeft: -10
-                    }} />
-                    <Text style={[styles.lable, {}]}>Description :</Text>
                 </View>
-                <Text style={[styles.lableDescription, { alignSelf: 'center', marginTop: 10 }]}>{item.description} </Text>
-            </View>
-            <View style={[styles.ContainerX, { alignContent: 'center', padding: 10 }]}>
-                <View style={{ flexDirection: 'row' }}>
-                    <View style={{
-                        backgroundColor: 'rgba(62, 168, 232,1)',
-                        height: 30,
-                        width: 8,
-                        position: 'absolute',
-                        marginLeft: -10
-                    }} />
-                    <Text style={[styles.lable, {}]}>Available Dates :</Text>
+                <View style={[styles.ContainerX, { alignContent: 'center', padding: 10 }]}>
+                    <View style={{ flexDirection: 'row' }}>
+                        <View style={{
+                            backgroundColor: 'rgba(62, 168, 232,1)',
+                            height: 30,
+                            width: 8,
+                            position: 'absolute',
+                            marginLeft: -10
+                        }} />
+                        <Text style={[styles.lable, {}]}>Recently Hosted Events :</Text>
+                    </View>
+                    <View>
+                        {DummyData.slice(-5).reverse().map((item) => (
+                            <View key={item.id}>
+                                <EventCard
+                                    item={item}
+                                    onPress={() => navigation.navigate('DetailedEvent', { item })}
+                                />
+                            </View>
+                        ))}
+                    </View>
                 </View>
-                <Calendar 
-                    enableSwipeMonths
-                    style={{
-                        borderWidth: 2,
-                        borderColor: 'gray',
-                        margin: mobileW * 0.04,
-                        borderRadius: 5,
-                    }}
-                    markedDates={{ ...markedDates }}
-                    minDate={formattedToday}
-                // maxDate={startDate}
+            </ScrollView>
+            <TouchableOpacity
+                onPress={() => { navigation.navigate('EditVenuePage', { item }) }}
+                style={{ height: mobileW * 0.12, width: mobileW * 0.12, backgroundColor: 'rgba(62, 168, 232,1)', position: 'absolute', alignSelf: 'flex-start', marginTop: mobileW * 1.95, borderRadius: mobileW * 0.12, marginLeft: mobileW * 0.83, alignItems: 'center' }}>
+                <Icon
+                    name="pencil"
+                    size={28}
+                    color='white'
+                    style={{ justifyContent: 'center', alignSelf: 'center', marginVertical: 8 }}
                 />
-            </View>
-            <View style={[styles.ContainerX, { alignContent: 'center', padding: 10 }]}>
-                <View style={{ flexDirection: 'row' }}>
-                    <View style={{
-                        backgroundColor: 'rgba(62, 168, 232,1)',
-                        height: 30,
-                        width: 8,
-                        position: 'absolute',
-                        marginLeft: -10
-                    }} />
-                    <Text style={[styles.lable, {}]}>Resent Events :</Text>
-                </View>
-                <View>
-                    {DummyData.slice(-5).reverse().map((item) => (
-                        <View key={item.id}>
-                            <EventCard
-                                item={item}
-                                onPress={() => navigation.navigate('DetailedEvent', { item })}
-                            />
-                        </View>
-                    ))}
-                </View>
-            </View>
-        </ScrollView>
+            </TouchableOpacity>
+            {/* <TouchableOpacity
+                onPress={() => { navigation.navigate('EditVenuePage', { item }) }}
+                style={{ height: mobileW * 0.12, width: mobileW * 0.12, backgroundColor: 'red', position: 'absolute', alignSelf: 'flex-start', marginTop: mobileW * 1.95, borderRadius: mobileW * 0.12, marginLeft: mobileW * 0.68, alignItems: 'center' }}>
+                <Icon
+                    name="trash"
+                    size={28}
+                    color='white'
+                    style={{ justifyContent: 'center', alignSelf: 'center', marginVertical: 8 }}
+                />
+            </TouchableOpacity> */}
+        </View>
     );
 };
 
