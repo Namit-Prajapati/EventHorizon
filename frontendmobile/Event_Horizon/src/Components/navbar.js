@@ -11,29 +11,18 @@ const NavBar = () => {
 
     return (
         <View style={styles.container}>
-            <TouchableOpacity onPress={() => { navigator.openDrawer() }}>
-                <MaterialIcons name='menu' size={25} color="white" style={{ marginRight: "10%" }} />
+            <TouchableOpacity onPress={() => { navigator.openDrawer() }} style={{ flex: 1 }}>
+                <MaterialIcons name='menu' size={25} color="white" />
             </TouchableOpacity>
             <Image
                 source={require('./../../assets/Logo/ehwhite.png')}
                 style={{ width: mobileW * 0.12, resizeMode: 'contain' }}
             />
-            <TouchableOpacity onPress={() => {
-                // navigator.reset({
-                //     index: 0,
-                //     routes: [{ name: 'Home' }],
-                // });
-            }}>
-                <Text style={styles.title}>EVENT HORIZON</Text>
-            </TouchableOpacity>
+            <Text style={styles.title}>EVENT HORIZON</Text>
             <View style={{ alignItems: 'flex-end', flex: 1 }}>
-                <View style={{ alignItems: 'flex-end', flexDirection: 'row', marginHorizontal: '3%', alignContent: 'space-between' }}>
+                <View style={{ alignItems: 'flex-end', flexDirection: 'row' }}>
                     <TouchableOpacity onPress={() => { }}>
                         <MaterialIcons name='notifications' size={25} color="white" />
-                    </TouchableOpacity>
-                    <View style={{ marginHorizontal: '3.5%' }}></View>
-                    <TouchableOpacity onPress={() => { }}>
-                        <MaterialIcons name='person-outline' size={25} color="white" />
                     </TouchableOpacity>
                 </View>
             </View>

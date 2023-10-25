@@ -4,13 +4,29 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import CustomCard from '../Components/smallcard';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import BNavBar from '../Components/bottomnavbar';
+import ImageViewer from 'react-native-image-zoom-viewer';
 import { TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 
 let mobileW = Dimensions.get('window').width;
 
+const DummyImages = [
+    {
+        url: 'https://www.adobe.com/content/dam/www/us/en/events/overview-page/eventshub_evergreen_opengraph_1200x630_2x.jpg',
+    },
+    {
+        url: 'https://www.eventbrite.ie/blog/wp-content/uploads/2022/09/dance-event.jpg',
+    },
+];
+
 const DetailedEventPage = ({ route }) => {
     const { item } = route.params;
+    const navigator = useNavigation();
+
+    const navigateToEditEvent = () => {
+        navigator.navigate('EditEvent', { item }); // Assuming you have set up 'EditEvent' as the screen name for EditEventPage in your navigator.
+    };
 
     return (
         <View style={styles.AppBg}>
@@ -62,12 +78,12 @@ const DetailedEventPage = ({ route }) => {
                     <View style={[styles.divider, { height: 2, marginHorizontal: 12 }]}></View>
                     <View style={[styles.container, { alignItems: 'center', elevation: 0 }]}>
                         <View style={{ flexDirection: 'row', }}>
-                            <CustomCard iconName="calendar-check-o" text="Date" desc={(item.StartEventDate == item.EndEventDate) ? item.StartEventDate : item.StartEventDate + "-" + item.EndEventDate} />
+                            <CustomCard iconName="calendar-check-o" text="Date" desc={(item.StartEventDate == item.EndEventDate) ? item.StartEventDate : item.StartEventDate + " to " + item.EndEventDate} />
                             <CustomCard iconName="clock-o" text="Registrtion Deadline" desc={item.LastDate} />
                         </View>
                         <View style={{ flexDirection: 'row' }}>
                             <CustomCard iconName="users" text="Registered" desc={item.RegisteredStudents} />
-                            <CustomCard iconName="sticky-note-o" text="Eligiblity" desc={item.Eligibility} />
+                            <CustomCard iconName="sticky-note-o" text="Eligiblity" desc={item.Eligibility.join(", ")} />
                         </View>
                     </View>
                 </View>
@@ -106,6 +122,29 @@ const DetailedEventPage = ({ route }) => {
                         {item.Description}
                     </Text>
                 </View>
+                <View style={styles.container}>
+                    <View style={{ height: mobileW * 0.9, backgroundColor: 'white' }}>
+                        <View style={{
+                            flexDirection: 'row',
+                            marginVertical: mobileW * .03,
+                        }}>
+                            <View style={{
+                                backgroundColor: 'rgba(62, 168, 232,1)',
+                                height: 35,
+                                width: 8,
+                            }}>
+
+                            </View>
+                            <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 20, marginTop: 4, marginLeft: 4 }}>
+                                Event Images
+                            </Text>
+                        </View>
+                        <ImageViewer
+                            imageUrls={DummyImages}
+                            enableSwipeDown
+                        />
+                    </View>
+                </View>
             </ScrollView >
             <View style={{ height: mobileW * 0.12, backgroundColor: 'rgba(62, 168, 232,1)', justifyContent: 'center' }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', }}>
@@ -125,7 +164,17 @@ const DetailedEventPage = ({ route }) => {
                     </TouchableOpacity>
                 </View>
             </View>
-        </View>
+            <TouchableOpacity
+                onPress={navigateToEditEvent}
+                style={{ height: mobileW * 0.12, width: mobileW * 0.12, backgroundColor: 'rgba(62, 168, 232,1)', position: 'absolute', alignSelf: 'flex-start', marginTop: mobileW * 1.85, borderRadius: mobileW * 0.12, marginLeft: mobileW * 0.83, alignItems: 'center' }}>
+                <Icon
+                    name="pencil"
+                    size={28}
+                    color='white'
+                    style={{ justifyContent: 'center', alignSelf: 'center', marginVertical: 8 }}
+                />
+            </TouchableOpacity>
+        </View >
     );
 };
 

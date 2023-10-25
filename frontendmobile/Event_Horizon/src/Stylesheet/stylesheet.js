@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
         color: 'black',
         fontSize: 24,
     },
-    
+
     emptyDate: {
         alignContent: 'center',
         alignSelf: 'center'
