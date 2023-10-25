@@ -7,6 +7,7 @@ var venueSchema = new Schema(
       type: String,
       required: true,
       trim: true,
+      unique: true,
     },
     bookedOn: [{ type: Date, unique: true, }],
     venueImages: [{ type: String }],

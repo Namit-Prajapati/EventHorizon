@@ -21,10 +21,12 @@ const uploadFacultyExcel = multer({
 
 const uploadlogobanner = multer({
   storage: multerFunctions.eventLogoBannerStorage,
-  fileFilter: multerFunctions.imageFileFilter,
+  fileFilter: multerFunctions.imagePdfFileFilter,
 }).fields([
   { name: "logo", maxCount: 1 },
   { name: "banner", maxCount: 1 },
+  { name: "images"},
+  { name: "reportFile", maxCount: 1 },
 ]);
 
 const adminController = require("../controllers/admin");
@@ -87,7 +89,7 @@ router.post(
 );
 
 // POST route for editing venue by ID
-router.post("/editvenue/:id", adminController.editVenue);
+router.post("/editvenue/:id", uploadVenueImages, adminController.editVenue);
 
 // DELETE route for deleting venue by ID
 router.post("/deletevenue/:id", adminController.deleteVenue);
@@ -176,5 +178,12 @@ router.post("/reject", adminController.declineEvent);
 
 // POST route to create an event
 router.post("/createevent", uploadlogobanner, eventController.createEvent);
+
+// GET route to get venue and club details before creating event
+router.get("/geteventformdata/:id", eventController.getPreEventFormData);
+
+// POST route to edit an event
+router.post("/editevent", uploadlogobanner, eventController.editEvent);
+
 
 module.exports = router;

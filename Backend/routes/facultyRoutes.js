@@ -9,8 +9,13 @@ const eventController = require("../controllers/events")
 
 const uploadlogobanner = multer({
   storage: multerFunctions.eventLogoBannerStorage,
-  fileFilter: multerFunctions.imageFileFilter,
-}).fields([{ name: 'logo', maxCount: 1 }, { name: 'banner', maxCount: 1 }]);
+  fileFilter: multerFunctions.imagePdfFileFilter,
+}).fields([
+  { name: "logo", maxCount: 1 },
+  { name: "banner", maxCount: 1 },
+  { name: "images"},
+  { name: "reportFile", maxCount: 1 },
+]);
 
 ///////////////////////////////////////////
 ///////// ***GET Venue data*** ////////////
@@ -83,7 +88,17 @@ router.get("/eventsbyclub/:id", facultyController.getEventsByClub);
 ///////////*Events Controller*/////////////
 ///l//////0///////r///////|)/////////M/////
 
-// POST route to create an event 
-router.post("/createevent",uploadlogobanner, eventController.createEvent);
+// POST route to create an event
+router.post("/createevent", uploadlogobanner, eventController.createEvent);
+
+// GET route to get venue and club details before creating event
+router.get("/geteventformdata/:id", eventController.getPreEventFormData);
+
+// POST route to edit an event
+router.post("/editevent", uploadlogobanner, eventController.editEvent);
+
+// GET route for fetching events using ID
+router.get("/getevent", eventController.getEventById);
+
 
 module.exports = router;

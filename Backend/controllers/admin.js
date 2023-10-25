@@ -49,11 +49,16 @@ exports.editVenue = async (req, res, next) => {
   try {
     const venueId = req.params.id;
     const { name, description, capacity } = req.body;
+    const venueImages = [];
+    req.files.map((file) => {
+      venueImages.push(file.path.split("\\").join("/"));
+    });
 
     const updatedVenue = await Venue.findByIdAndUpdate(
       venueId,
       {
         name: name,
+        venueImages: venueImages,
         description: description,
         capacity: capacity,
       },
@@ -75,7 +80,7 @@ exports.editVenue = async (req, res, next) => {
       .json({ error: "An error occurred while updating the venue" });
   }
 };
-
+// not for use
 exports.addVenueImage = async (req, res, next) => {
   try {
     const venueId = req.params.id;
@@ -102,7 +107,7 @@ exports.addVenueImage = async (req, res, next) => {
       .json({ error: "An error occurred while adding venue images" });
   }
 };
-
+// not for use
 exports.deleteVenueImage = async (req, res, next) => {
   try {
     const venueId = req.params.id;
@@ -405,6 +410,7 @@ exports.createClub = async (req, res, next) => {
 };
 
 // POST route for editing club name by ID
+// will not use
 exports.editClubName = async (req, res, next) => {
   try {
     const clubId = req.params.id; // Get club ID from request param
@@ -529,7 +535,21 @@ exports.getClubById = async (req, res, next) => {
   try {
     const clubId = req.params.id; //get club ID from request param
 
-    const club = await Club.findById(clubId);
+    const club = await Club.findById(clubId)
+      .populate({path:"facultyId",
+      select: "name _id email"});
+      // .select({
+      //   _id: 1,
+      //   name: 1,
+      //   facultyId: [
+      //     {
+      //       _id: 1,
+      //       email: 1,
+      //       name: 1,
+      //     },
+      //   ],
+      //   organizedEvents: 1,
+      // });
 
     if (!club) {
       return res.status(404).json({ error: "Club not found" });
@@ -547,7 +567,8 @@ exports.getClubById = async (req, res, next) => {
 // GET route for getting all of the clubs
 exports.getAllClub = async (req, res, next) => {
   try {
-    const clubs = await Club.find();
+    const clubs = await Club.find().populate({path:"facultyId",
+    select: "name _id email"});
 
     res.status(200).json({ clubs });
   } catch (error) {
@@ -558,7 +579,6 @@ exports.getAllClub = async (req, res, next) => {
   }
 };
 
-
 ///////////////////////////////////////////
 ////////////*Approve  Events*//////////////
 ///l//////0///////r///////|)/////////M/////
@@ -566,7 +586,7 @@ exports.getAllClub = async (req, res, next) => {
 // GET route to get all requested events
 exports.getRequestedEvents = async (req, res, next) => {
   try {
-    const RequestedEvents = await Event.find({ status: 'requested' });
+    const RequestedEvents = await Event.find({ status: "requested" });
 
     res.status(200).json({ RequestedEvents });
   } catch (error) {
@@ -584,12 +604,16 @@ exports.approveEvent = async (req, res, next) => {
     const { eventId } = req.body;
     const updatedEvent = await Event.findById(eventId);
     if (!updatedEvent) {
-      return res.status(404).json({ error: 'Event not found' });
+      return res.status(404).json({ error: "Event not found" });
     }
 
     const venue = await Venue.findOne(updatedEvent.venueId);
-    
-    for(let date = updatedEvent.startDate; date<=updatedEvent.endDate; date.setDate(date.getDate() + 1)){
+
+    for (
+      let date = updatedEvent.startDate;
+      date <= updatedEvent.endDate;
+      date.setDate(date.getDate() + 1)
+    ) {
       venue.bookedOn.push(new Date(date));
     }
     venue.hostedEvents.push(updatedEvent._id);
@@ -601,7 +625,7 @@ exports.approveEvent = async (req, res, next) => {
 
     res.status(200).json(updatedEvent);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -612,16 +636,16 @@ exports.declineEvent = async (req, res, next) => {
     const { eventId } = req.body;
     const updatedEvent = await Event.findByIdAndUpdate(
       eventId,
-      { status: 'rejected' }, // Set the status to 'upcoming' for approval
+      { status: "rejected" }, // Set the status to 'upcoming' for approval
       { new: true }
     );
 
     if (!updatedEvent) {
-      return res.status(404).json({ error: 'Event not found' });
+      return res.status(404).json({ error: "Event not found" });
     }
 
     res.status(200).json(updatedEvent);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: "Internal server error" });
   }
 };
