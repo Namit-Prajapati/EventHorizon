@@ -21,4 +21,13 @@ router.get("/acadeventafterdate/:date", studentController.getAcademicEventsAfter
 router.get("/getallacadevent", studentController.getAllAcademicEvent);
 
 
+///////////////////////////////////////////
+//////////// **GET  Events** //////////////
+///l//////0///////r///////|)/////////M/////
+
+// GET route to get event by event id for students
+router.get("/getevent", studentController.getEventById);
+
+
+
 module.exports=router

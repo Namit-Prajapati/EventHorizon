@@ -33,7 +33,7 @@ exports.checkAccess = async (req, res, next) => {
 exports.getEventById = async (req, res, next) => {
   try {
     const { userId, eventId } = req.query; //get event ID and userId from request query
-
+    console.log(userId, eventId);
     const event = await Event.findById(eventId);
     const user = await User.findById(userId);
     const venue = await Venue.findById(event.venueId);
@@ -53,7 +53,11 @@ exports.getEventById = async (req, res, next) => {
     let hasAccess = false;
     let isRegistered = false;
     let hasAttended = false;
+    let canRegister = true;
 
+    if(today > event.registrationDeadline){
+      canRegister = false;
+    }
     if(event.registrations.includes(userId)){
         isRegistered = true;
     }
@@ -62,12 +66,12 @@ exports.getEventById = async (req, res, next) => {
     }
     if (studentAccess) {
       hasAccess = true;
-      return res.status(200).json({ event, venueName,  clubName, isRegistered, hasAttended, hasAccess });
+      return res.status(200).json({ event, venueName,  clubName, canRegister, isRegistered, hasAttended, hasAccess });
     }
 
     for (let eve of event.targetedDept) {
       if (eve === user.department) {
-        return res.status(200).json({ event, venueName,  clubName, hasAccess });
+        return res.status(200).json({ event, venueName,  clubName, hasAccess, canRegister, isRegistered, hasAttended });
       }
     }
     return res
@@ -82,15 +86,131 @@ exports.getEventById = async (req, res, next) => {
 };
 
 // GET route to get all events based on targeted dept
+exports.getAllEvent = async (req, res, next) => {
+  try {
+    const { department } = req.query; //get student dept from req query
+    const events = await Event.find();
 
-// GET route to get all events registered by user return only event name, logo, startDate, endDate, regDeadline, lub name
+    let eventByDept = [];
+
+    events.forEach((event) => {
+      let departments = event.targetedDept;
+      for (let eve of departments) {
+        if (eve === department) {
+          eventByDept.push(event);
+          // console.log(acadEventByDept);
+        }
+      }
+    });
+
+    res.status(200).json({ eventByDept });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: "An error occurred while retrieving all events",
+    });
+  }
+};
+
+// GET route to get all events registered by user return only event name, logo, startDate, endDate, regDeadline, club name
 // take user id in req param
 
-// GET route to get upcoming events return only event name, logo, startDate, endDate, regDeadline, lub name
 
-// GET route to get past events return only event name, logo, startDate, endDate, regDeadline, lub name
+// GET route to get upcoming events using dept in params
+exports.getUpcomingEvents = async (req, res) => {
+  try {
+    const { department } = req.params;
+    const targetDate = new Date(); 
+    if (isNaN(targetDate.getTime())) {
+      return res.status(400).json({ error: "Invalid date format" });
+    }
+
+    const events = await Event.find({
+      endDate: { $gte: targetDate },
+    });
+
+    let eventByDept = [];
+
+    events.forEach((event) => {
+      let departments = event.targetedDept;
+      for (let eve of departments) {
+        if (eve === department) {
+          eventByDept.push(event);
+          // console.log(acadEventByDept);
+        }
+      }
+    });
+
+    res.status(200).json({ eventByDept });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching events" });
+  }
+};
+
+// GET route to get past events using dept in params
+exports.getPastEvents = async (req, res) => {
+  try {
+    const { department } = req.params;
+    const targetDate = new Date(); 
+    if (isNaN(targetDate.getTime())) {
+      return res.status(400).json({ error: "Invalid date format" });
+    }
+
+    const events = await Event.find({
+      endDate: { $lt: targetDate },
+    });
+
+    let eventByDept = [];
+
+    events.forEach((event) => {
+      let departments = event.targetedDept;
+      for (let eve of departments) {
+        if (eve === department) {
+          eventByDept.push(event);
+          // console.log(acadEventByDept);
+        }
+      }
+    });
+
+    res.status(200).json({ eventByDept });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching events" });
+  }
+};
 
 // POST route to register for an event get eventId userId in req body
+exports.registerEvent = async (req, res, next) => {
+  try {
+    const {eventId, studentId} = req.body;
+
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+    const today = new Date();
+    if (today > event.registrationDeadline) {
+      return res.status(404).json({ error: "Event is not accepting any more Registrations" });
+    }
+
+    if (event.registrations.includes(studentId)) {
+      return res.status(404).json({ error: "User is already registered for this event" }); 
+    }
+
+    event.registrations.push(studentId);
+
+    await event.save();
+
+    return res.status(200).json({ error: "User registered for the event" });
+  } catch (error) {
+    return res.status(404).json({ error: "Error registering user for the event" });
+  }
+};
 
 ///////////////////////////////////////////
 //////*GET Academic Event for stud*////////
