@@ -68,7 +68,13 @@ const EditEventPage = ({ route }) => {
             const result = await DocumentPicker.pick({
                 type: [DocumentPicker.types.allFiles],
             });
-            setSelectedFile(result);
+            console.log(result);
+            if ((result[0].type === "application/pdf") || (result[0].type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document")) {
+                setSelectedFile(result);
+            } else {
+                // The selected file is not a PDF or a DOCX file.
+                alert('Please select a PDF or DOCX file.');
+            }
         } catch (err) {
             if (DocumentPicker.isCancel(err)) {
                 // User cancelled the picker

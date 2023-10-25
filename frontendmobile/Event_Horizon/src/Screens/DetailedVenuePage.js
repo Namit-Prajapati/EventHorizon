@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, Text, Image, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import { View, ScrollView, Text, Image, StyleSheet, Dimensions, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import { Calendar } from 'react-native-calendars';
 import { API_IP } from "@env";
 import { useNavigation } from '@react-navigation/native';
 import EventCard from '../Components/EventCard';
 import Icon from 'react-native-vector-icons/FontAwesome';
+
 
 let mobileW = Dimensions.get('window').width;
 
@@ -103,6 +104,8 @@ const DetailedVenuePage = ({ route }) => {
     const { item } = route.params;
     const [VenueImages, setVenueImages] = useState(null);
     const [markedDates, setMarkedDates] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [showAlert, setShowAlert] = useState(false);
 
     const today = new Date();
     const formattedToday = today.toISOString().split('T')[0];
@@ -128,11 +131,93 @@ const DetailedVenuePage = ({ route }) => {
         setVenueImages(Images);
     }, []);
 
+    const handleShowAlert = () => {
+        setShowAlert(true);
+    };
+
+    const sendDataToAPI = async () => {
+        setIsLoading(true);
+        console.log('Create Venue');
+        // console.log(selectedImages[0].path);
+        // console.log(selectedImages[0].mime);
+        // console.log(`Image.${selectedImages[0].mime.split("/")[1]}`);
+        // console.log(venueDescription);
+        // console.log(capacity);
+
+        const apiUrl = `${API_IP}admin/deletevenue/${item._id}`;
+
+        await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        })
+
+            .then((Response) => Response.json())
+            .then((json) => {
+                console.log(json);
+                if (json.message) {
+                    alert(json.message);
+                    navigation.navigate('Home');
+                }
+                if (json.error) {
+                    alert(json.error);
+                }
+            })
+            .finally(() => {
+                setIsLoading(false); // Set loading state to false when API call is complete
+            });
+    };
+
+    const renderAlert = () => {
+        Alert.alert(
+            'Are you sure?',
+            'You want to Delete this Venue?',
+            [
+                {
+                    text: 'No',
+                    onPress: () => setShowAlert(false),
+                    style: 'cancel',
+                },
+                {
+                    text: 'Yupp!',
+                    onPress: () => {
+                        sendDataToAPI();
+                        setShowAlert(false);
+                    },
+                },
+            ],
+            { cancelable: false },
+        );
+    };
+
     return (
         <View style={styles.container}>
 
             <ScrollView style={styles.container}>
-                <Text style={styles.header}>{item.name} </Text>
+                {showAlert && renderAlert()}
+                <View style={{ flexDirection: 'row' }}>
+                    <Text style={[styles.header, { flex: 1 }]}>{item.name} </Text>
+                    <TouchableOpacity
+                        onPress={handleShowAlert}
+                        style={[styles.deletebutton, { flexDirection: 'row', elevation: 2 }]}
+                    >
+                        {isLoading ? (
+                            <ActivityIndicator size="small" color="white" /> // Show the progress indicator when loading
+                        ) : (
+                            <View style={{ flexDirection: 'row' }}>
+                                {/* <Icon
+                                    name="trash"
+                                    size={16}
+                                    color='white'
+                                    style={{ justifyContent: 'center', alignSelf: 'center', marginVertical: 8 }}
+                                /> */}
+                                <Text style={{ color: 'white', alignSelf: 'center', padding: 3 }}> Delete Venue</Text>
+                            </View>
+                        )}
+                    </TouchableOpacity>
+                </View>
+
                 {
                     VenueImages ? <View style={[styles.ContainerX, { height: mobileW * 0.9, }]}>
                         <ImageViewer
@@ -249,6 +334,15 @@ const styles = StyleSheet.create({
         marginHorizontal: mobileW * 0.04,
         marginTop: mobileW * 0.04,
         alignSelf: 'flex-start',
+    },
+    deletebutton: {
+        color: 'white',
+        backgroundColor: 'red',
+        alignSelf: 'center',
+        padding: 5,
+        marginHorizontal: mobileW * 0.04,
+        marginTop: mobileW * 0.04,
+        borderRadius: 7,
     },
     venueContainer: {
         marginHorizontal: mobileW * 0.04,

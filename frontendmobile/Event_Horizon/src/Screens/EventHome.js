@@ -6,19 +6,47 @@ import EventStyles from '../Stylesheet/eventpagestyle';
 
 const EHome = ({ route }) => {
     const [selectedDate, setSelectedDate] = useState(route.params.date);
-    const events = {
-        '2023-10-09': [
-            { title: 'Meeting', description: 'Discuss project', startTime: '09:00 AM', endTime: '10:00 AM' },
-            { title: 'Lunch', description: 'Restaurant name', startTime: '12:00 PM', endTime: '01:00 PM' },
-        ],
-        '2023-10-10': [
-            { title: 'Conference', description: 'Conference details', startTime: '10:00 AM', endTime: '04:00 PM' },
-        ],
-        '2023-10-12': [
-            { title: 'Event 1', description: 'Event 1 details', startTime: '02:00 PM', endTime: '03:00 PM' },
-            { title: 'Event 2', description: 'Event 2 details', startTime: '04:00 PM', endTime: '05:00 PM' },
-        ],
-    };
+    const [events, setEvents] = useState({});
+
+
+    const AcadmicEventData = route.params.AcadmicEvent;
+
+    console.log(AcadmicEventData);
+
+    useEffect(() => {
+        let events = {};
+        AcadmicEventData.forEach(item => {
+            const startDate = new Date(item.startDate);
+            const endDate = new Date(item.endDate);
+
+            // Calculate the number of days between the start and end date
+            const daysDiff = (endDate - startDate) / (1000 * 60 * 60 * 24);
+
+            // Iterate through the date range
+            for (let i = 0; i <= daysDiff; i++) {
+                const currentDate = new Date(startDate);
+                currentDate.setDate(startDate.getDate() + i);
+                const dateString = currentDate.toISOString().split('T')[0];
+
+                const event = {
+                    title: item.name,
+                    description: `Targeted Depts: ${item.targetedDept.join(', ')}`,
+                    startTime: startDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                    endTime: endDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                    type: 'A', // Adding the 'type' property with the value 'A'
+                };
+
+                if (!events[dateString]) {
+                    events[dateString] = [event];
+                } else {
+                    events[dateString].push(event);
+                }
+            }
+        });
+        console.log(events);
+        setEvents(events);
+    }, []);
+
 
     // Calculate start date as selectedDate - 15 days
     const startDate = new Date(selectedDate);
@@ -61,8 +89,10 @@ const EHome = ({ route }) => {
                 renderItem={(item) => (
                     <View style={EventStyles.eventItem}>
                         <Text style={EventStyles.TitleTextStyle}>{item.title}</Text>
-                        <Text style={EventStyles.DesTextStyle}>{item.description}</Text>
-                        <Text style={EventStyles.TimeTextStyle}>{item.startTime} - {item.endTime}</Text>
+                        {
+                            item.type == 'A' ? <Text style={EventStyles.DesTextStyle}>Acadmic Event</Text> : null
+                        }
+                        <Text style={EventStyles.TimeTextStyle}>{item.description}</Text>
                     </View>
                 )}
                 rowHasChanged={(r1, r2) => r1 !== r2}

@@ -344,6 +344,7 @@ const styles = StyleSheet.create({
         borderWidth: mobileW * .005,
         marginHorizontal: mobileW * 0.04,
         borderRadius: 10,
+        paddingLeft: 10,
     },
     fileInputButton: {
         backgroundColor: 'rgba(62, 168, 232, 1)',
