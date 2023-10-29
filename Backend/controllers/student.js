@@ -228,6 +228,7 @@ exports.registerEvent = async (req, res, next) => {
     const { eventId, studentId } = req.body;
 
     const event = await Event.findById(eventId);
+    const student = await User.findById(studentId);
     if (!event) {
       return res.status(404).json({ error: "Event not found" });
     }
@@ -245,7 +246,9 @@ exports.registerEvent = async (req, res, next) => {
     }
 
     event.registrations.push(studentId);
+    student.registrations.push(eventId);
 
+    await student.save();
     await event.save();
 
     return res.status(200).json({ error: "User registered for the event" });

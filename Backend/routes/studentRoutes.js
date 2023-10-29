@@ -9,7 +9,7 @@ const academicEventsController = require("../controllers/academicEvents");
 
 
 // GET route for fetching acad events using ID
-router.get("/getacadevent/:id", studentController.getAcademicEventById);
+router.get("/getacadevent", studentController.getAcademicEventById);
 
 // GET route for fetching acad events happening on selected date
 router.get("/acadeventcurrdate/:date", studentController.getAcademicEventsOnCurrDate);
