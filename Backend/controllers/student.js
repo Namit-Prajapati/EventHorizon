@@ -55,23 +55,39 @@ exports.getEventById = async (req, res, next) => {
     let hasAttended = false;
     let canRegister = true;
 
-    if(today > event.registrationDeadline){
+    if (today > event.registrationDeadline) {
       canRegister = false;
     }
-    if(event.registrations.includes(userId)){
-        isRegistered = true;
+    if (event.registrations.includes(userId)) {
+      isRegistered = true;
     }
-    if(event.attendees.includes(userId)){
-        hasAttended = true;
+    if (event.attendees.includes(userId)) {
+      hasAttended = true;
     }
     if (studentAccess) {
       hasAccess = true;
-      return res.status(200).json({ event, venueName,  clubName, canRegister, isRegistered, hasAttended, hasAccess });
+      return res.status(200).json({
+        event,
+        venueName,
+        clubName,
+        canRegister,
+        isRegistered,
+        hasAttended,
+        hasAccess,
+      });
     }
 
     for (let eve of event.targetedDept) {
       if (eve === user.department) {
-        return res.status(200).json({ event, venueName,  clubName, hasAccess, canRegister, isRegistered, hasAttended });
+        return res.status(200).json({
+          event,
+          venueName,
+          clubName,
+          hasAccess,
+          canRegister,
+          isRegistered,
+          hasAttended,
+        });
       }
     }
     return res
@@ -114,13 +130,39 @@ exports.getAllEvent = async (req, res, next) => {
 
 // GET route to get all events registered by user return only event name, logo, startDate, endDate, regDeadline, club name
 // take user id in req param
+exports.registeredEvents = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const user = await User.findById(id).populate({
+      path: "registrations",
+      select: "name logo startDate endDate registrationDeadline",
+      populate: { path: "clubId", select: "name" },
+    });
 
+    if (!user) {
+      return res.status(400).json({ message: "User not found!" });
+    }
+
+    if (user.registrations.length === 0) {
+      return res.status(400).json({ message: "No registered events found!" });
+    }
+
+    return res.status(200).json({
+      message: "registered events fetched",
+      registrations: user.registrations,
+    });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ error: "An error occurred while fetching registered events" });
+  }
+};
 
 // GET route to get upcoming events using dept in params
 exports.getUpcomingEvents = async (req, res) => {
   try {
     const { department } = req.params;
-    const targetDate = new Date(); 
+    const targetDate = new Date();
     if (isNaN(targetDate.getTime())) {
       return res.status(400).json({ error: "Invalid date format" });
     }
@@ -144,9 +186,7 @@ exports.getUpcomingEvents = async (req, res) => {
     res.status(200).json({ eventByDept });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while fetching events" });
+    res.status(500).json({ error: "An error occurred while fetching events" });
   }
 };
 
@@ -154,7 +194,7 @@ exports.getUpcomingEvents = async (req, res) => {
 exports.getPastEvents = async (req, res) => {
   try {
     const { department } = req.params;
-    const targetDate = new Date(); 
+    const targetDate = new Date();
     if (isNaN(targetDate.getTime())) {
       return res.status(400).json({ error: "Invalid date format" });
     }
@@ -178,16 +218,14 @@ exports.getPastEvents = async (req, res) => {
     res.status(200).json({ eventByDept });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while fetching events" });
+    res.status(500).json({ error: "An error occurred while fetching events" });
   }
 };
 
 // POST route to register for an event get eventId userId in req body
 exports.registerEvent = async (req, res, next) => {
   try {
-    const {eventId, studentId} = req.body;
+    const { eventId, studentId } = req.body;
 
     const event = await Event.findById(eventId);
     if (!event) {
@@ -195,11 +233,15 @@ exports.registerEvent = async (req, res, next) => {
     }
     const today = new Date();
     if (today > event.registrationDeadline) {
-      return res.status(404).json({ error: "Event is not accepting any more Registrations" });
+      return res
+        .status(404)
+        .json({ error: "Event is not accepting any more Registrations" });
     }
 
     if (event.registrations.includes(studentId)) {
-      return res.status(404).json({ error: "User is already registered for this event" }); 
+      return res
+        .status(404)
+        .json({ error: "User is already registered for this event" });
     }
 
     event.registrations.push(studentId);
@@ -208,7 +250,9 @@ exports.registerEvent = async (req, res, next) => {
 
     return res.status(200).json({ error: "User registered for the event" });
   } catch (error) {
-    return res.status(404).json({ error: "Error registering user for the event" });
+    return res
+      .status(404)
+      .json({ error: "Error registering user for the event" });
   }
 };
 
@@ -233,7 +277,9 @@ exports.getAcademicEventById = async (req, res, next) => {
       }
     }
 
-    res.status(404).json({ error: "Academic event does not belongs to user department" });
+    res
+      .status(404)
+      .json({ error: "Academic event does not belongs to user department" });
   } catch (error) {
     console.error(error);
     res
@@ -242,7 +288,7 @@ exports.getAcademicEventById = async (req, res, next) => {
   }
 };
 
-// GET route for getting all of the academic events 
+// GET route for getting all of the academic events
 //get student dept from req query
 exports.getAllAcademicEvent = async (req, res, next) => {
   try {
@@ -338,5 +384,3 @@ exports.getAcademicEventsAfterDate = async (req, res) => {
       .json({ error: "An error occurred while fetching academic events" });
   }
 };
-
-
