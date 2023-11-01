@@ -98,7 +98,19 @@ router.get("/geteventformdata/:id", eventController.getPreEventFormData);
 router.post("/editevent", uploadlogobanner, eventController.editEvent);
 
 // GET route for fetching events using ID
-router.get("/getevent", eventController.getEventById);
+router.get("/geteventbyid", eventController.getEventById);
+
+// GET route for getting all of the events
+router.get("/getallevent", eventController.getAllEvent);
+
+// GET route for fetching events happening on given date
+router.get("/geteventoncurrentdate/:date", eventController.getEventsOnCurrDate);
+
+// GET route for fetching events happening on or after today
+router.get("/getupcomingevents", eventController.getUpcomingEvents);
+
+// GET route to get past events return only event name, logo, startDate, endDate, regDeadline, lub name
+router.get("/getpastevents", eventController.getPastEvents);
 
 
 module.exports = router;
