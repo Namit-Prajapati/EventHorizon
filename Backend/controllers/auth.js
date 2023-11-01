@@ -27,11 +27,11 @@ exports.login = async (req, res, next) => {
         userId: loadedUser._id.toString(),
         department: loadedUser.department,
         role: loadedUser.role,
+        name: loadedUser.name,
       },
-      "somesecretstring",
-      { expiresIn: "1h" }
+      "somesecretstring"
     );
-    res.status(200).json({ token: token, userId: loadedUser._id.toString(), department: loadedUser.department, role: loadedUser.role,});
+    res.status(200).json({ token: token, userId: loadedUser._id.toString(), department: loadedUser.department, role: loadedUser.role,name: loadedUser.name,email: loadedUser.email});
   } catch (err) {
     
     return res.status(500).json({message:"Server Error"});
