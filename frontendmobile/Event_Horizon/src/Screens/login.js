@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -12,40 +12,10 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import LoginStyles from '../Stylesheet/loginStyles';
-
+import { API_IP } from "@env";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const mobileW = Dimensions.get('window').width;
-
-const Data = [
-    {
-        id: '1',
-        name: 'Priyansh Gupta',
-        Email: 'priyansh@gmail.com',
-        password: 'acro@123',
-        year: 'fourth',
-    },
-    {
-        id: '2',
-        name: 'Murtaza Bohra',
-        Email: 'murtaza@gmail.com',
-        password: 'acro@123',
-        year: 'second',
-    },
-    {
-        id: '3',
-        name: 'Ranak Agrawal',
-        Email: 'ranak@gmail.com',
-        password: 'acro@123',
-        year: 'first',
-    },
-    {
-        id: '4',
-        name: 'Namit Prajapati',
-        Email: 'namit@gmail.com',
-        password: 'acro@123',
-        year: 'third',
-    },
-];
 
 const Login = ({ route }) => {
 
@@ -57,57 +27,76 @@ const Login = ({ route }) => {
     const [PResult, setPResult] = useState('');
     const [Hide, setHide] = useState(true);
 
+    useEffect(() => {
+        AsyncStorage.getItem('token')
+            .then((token) => {
+                if (token) {
+                    // Data found, navigate to the home screen
+                    goToHome();
+                } else {
+                    // No data found, stay on the login screen
+                }
+            })
+            .catch((error) => {
+                console.error('Error checking AsyncStorage:', error);
+            });
+    }, [])
+
+    const handelLoginUser = () => {
+        const url = `${API_IP}auth/login`;
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: Email,
+                password: Password
+            })
+        })
+            .then((Response) => Response.json())
+            .then((json) => {
+                if (json.token) {
+                    console.log(json.token);
+                    AsyncStorage.setItem('token', json.token);
+                    console.log(json.userId);
+                    AsyncStorage.setItem('userId', json.userId);
+                    console.log(json.department);
+                    AsyncStorage.setItem('department', json.department);
+                    console.log(json.role);
+                    AsyncStorage.setItem('role', json.role);
+                    console.log(json.name);
+                    AsyncStorage.setItem('name', json.name);
+                    console.log(json.email);
+                    AsyncStorage.setItem('email', json.email);
+                    goToHome();
+                }
+                if (json.message) {
+                    console.log(json.message)
+                    if (Email == '') {
+                        setEResult('* Email can not be empty')
+                    } else {
+                        setEResult('')
+                    }
+                    if (Password == '') {
+                        setPResult('* Password can not be empty')
+                    } else {
+                        setPResult('* Invalid Email or Password')
+                    }
+                }
+            })
+            .catch((error) => {
+                console.log(error);
+            })
+
+    }
+
     const HideButton = () => {
         setHide(!Hide);
     }
 
     const goToHome = () => {
-        navigator.navigate('Home');
-    }
-
-    // const HandleSubmit = () => {
-    //     console.log("Handle Submit");
-    //     if (Email == '') {
-    //         setEResult('Email can\'t be empty')
-    //     }
-    //     if (Password == '') {
-    //         setPResult('Password can\'t be empty')
-    //     }
-    //     if (Email != '' && Password != '') {
-    //         setEResult('');
-    //         setPResult('');
-    //         OnSubmit();
-    //     }
-    // }
-
-    const HandleSubmit = () => {
-        if (Email === '') {
-            setEResult('Email can\'t be empty');
-        } else if (Password === '') {
-            setPResult('Password can\'t be empty');
-        } else {
-            setEResult('');
-            setPResult('');
-            OnSubmit();
-        }
-    };
-
-    const OnSubmit = () => {
-        console.log("On Submit");
-        for (let index = 0; index < Data.length; index++) {
-            if (Email === Data[index].Email) {
-                if (Password === Data[index].password) {
-                    alert(`Welcome ${Data[index].name}`);
-                    navigator.navigate('Xyz', { userData: Data[index] });
-                }
-                else {
-                    setPResult('Incorrect Password');
-                }
-            }
-            // console.log(Id);
-            // const element = Data[index];
-            // console.log(element);
-        }
+        navigator.navigate('Xyz');
     }
 
     return (
@@ -203,7 +192,7 @@ const Login = ({ route }) => {
                     {PResult ? <Text style={[LoginStyles.Warning]}>{PResult}</Text> : null}
 
                     <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-                        <TouchableOpacity style={[LoginStyles.LoignButton]} onPress={HandleSubmit}>
+                        <TouchableOpacity style={[LoginStyles.LoignButton]} onPress={handelLoginUser}>
                             <Text style={{
                                 fontWeight: 'bold',
                                 fontSize: mobileW * .05,

@@ -1,14 +1,61 @@
 // DrawerContent.js
 
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, Dimensions } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { ScrollView, View, Text, TouchableOpacity, StyleSheet, Image, Dimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons'; // You can choose a different icon library
 import Modal from 'react-native-modal';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const mobileW = Dimensions.get('window').width;
 
 const CustomDrawer = ({ routes }) => {
+
+    const [storedData, setStoredData] = useState([]);
+    const [userInfo, setUserInfo] = useState({});
+
+
+    useEffect(() => {
+        getData();
+    }, [])
+
+    useEffect(() => {
+        console.log(storedData);
+        const convertedData = {};
+        storedData.forEach((item) => {
+            const { key, value } = item;
+            convertedData[key] = value;
+        });
+        setUserInfo(convertedData);
+    }, [storedData])
+
+    useEffect(() => {
+        console.log(userInfo);
+    }, [userInfo])
+
+    const getData = async () => {
+        AsyncStorage.getAllKeys()
+            .then(async (allKeys) => {
+                // Use multiGet to retrieve the corresponding values for each key
+                const dataPairs = await AsyncStorage.multiGet(allKeys);
+                // Convert the data to a format that can be displayed
+                const data = dataPairs.map(([key, value]) => ({ key, value }));
+                setStoredData(data);
+            })
+            .catch((error) => {
+                console.error('Error retrieving data:', error);
+            });
+    }
+
+    const clearAllData = async () => {
+        try {
+            await AsyncStorage.clear();
+            console.log('AsyncStorage data cleared');
+        } catch (error) {
+            console.error('Error clearing AsyncStorage data:', error);
+        }
+    };
+
     const [isModalVisible, setModalVisible] = useState(false);
     const navigator = useNavigation();
 
@@ -17,14 +64,14 @@ const CustomDrawer = ({ routes }) => {
     };
 
     return (
-        <View style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
+        <ScrollView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
             <View style={{ alignItems: 'flex-start' }}>
                 <Image
                     source={require('./../../assets/Logo/ehblue.png')}
                     style={{ height: mobileW * .18, resizeMode: 'contain', width: mobileW * 0.22, marginTop: mobileW * 0.07, marginBottom: mobileW * 0.009 }}
                 />
-                <Text style={{ color: 'black', fontWeight: '700', fontSize: 20, marginHorizontal: 10, marginTop: 5, marginBottom: 2 }}>Priyansh Gupta</Text>
-                <Text style={{ color: 'black', fontWeight: '400', fontSize: 14, marginHorizontal: 10 }}>priyanshgupta20333@acropolis.in</Text>
+                <Text style={{ color: 'black', fontWeight: '700', fontSize: 20, marginHorizontal: 10, marginTop: 5, marginBottom: 2 }}>{userInfo.name}</Text>
+                <Text style={{ color: 'black', fontWeight: '400', fontSize: 14, marginHorizontal: 10 }}>{userInfo.email}</Text>
             </View>
             <View style={styles.divider} />
             <CustomTouchable text="Home" onClick={() => { navigator.navigate('Home'); }} icon={'home-outline'} />
@@ -36,6 +83,7 @@ const CustomDrawer = ({ routes }) => {
             <CustomTouchable text="Create Event" onClick={() => { navigator.navigate('CreateEventPage'); }} icon={'add-circle-outline'} />
             <CustomTouchable text="Create Acadmic Event" onClick={() => { navigator.navigate('CreateAcadmicEventPage'); }} icon={'add-circle-outline'} />
             <CustomTouchable text="Create Venue" onClick={() => { navigator.navigate('CreateVenuePage'); }} icon={'add-circle-outline'} />
+            <CustomTouchable text="Add User" onClick={() => { navigator.navigate('CreateVenuePage'); }} icon={'add-circle-outline'} />
             <View style={styles.divider} />
             <Text style={{ color: 'gray', fontWeight: '700', fontSize: 14, marginHorizontal: 10, marginVertical: 10 }}>My Account</Text>
             <CustomTouchable text="QR code" onClick={toggleModal} icon={'qr-code-outline'} />
@@ -50,12 +98,13 @@ const CustomDrawer = ({ routes }) => {
             </Modal>
 
             <CustomTouchable text="Logout" onClick={() => {
+                clearAllData();
                 navigator.reset({
                     index: 0,
                     routes: [{ name: 'Login' }],
                 });
             }} icon={'log-out-outline'} />
-        </View >
+        </ScrollView >
     );
 }
 

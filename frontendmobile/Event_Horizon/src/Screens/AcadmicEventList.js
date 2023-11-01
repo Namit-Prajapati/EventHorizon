@@ -14,7 +14,7 @@ const ListAcadmicEventsPage = ({ route }) => {
     const onRefresh = React.useCallback(() => {
         setRefreshing(true);
         console.log("hello");
-        fetchData();
+        fetchAllAcadmicEventData();
         setTimeout(() => {
             setRefreshing(false);
         }, 1000);

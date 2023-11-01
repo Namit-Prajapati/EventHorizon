@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, RefreshControl, Alert, Image, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, ScrollView, ActivityIndicator, Alert, Image, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { API_IP } from "@env";
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 let mobileW = Dimensions.get('window').width;
 
@@ -23,7 +24,7 @@ const DetaailedAcadmicEventsPage = ({ route }) => {
     const renderAlert = () => {
         Alert.alert(
             'Are you sure?',
-            'You want to Delete this Club?',
+            'You want to Delete this Event?',
             [
                 {
                     text: 'No',
@@ -33,7 +34,7 @@ const DetaailedAcadmicEventsPage = ({ route }) => {
                 {
                     text: 'Yupp!',
                     onPress: () => {
-                        // sendDataToAPI();
+                        deleteAcadmicEvent();
                         setShowAlert(false);
                     },
                 },
@@ -42,40 +43,77 @@ const DetaailedAcadmicEventsPage = ({ route }) => {
         );
     };
 
+    const deleteAcadmicEvent = async () => {
+        setIsLoading(true);
+        console.log('Delete Club');
+
+        const apiUrl = `${API_IP}admin/deleteacadevent/${item._id}`;
+
+        await fetch(apiUrl, {
+            method: 'POST',
+        })
+            .then((Response) => Response.json())
+            .then((json) => {
+                console.log(json);
+                if (json.message) {
+                    alert(json.message);
+                    navigation.navigate('Home');
+                }
+                if (json.error) {
+                    alert(json.error);
+                }
+            })
+            .finally(() => {
+                setIsLoading(false); // Set loading state to false when API call is complete
+            });
+    };
+
     return (
         <View style={styles.container}>
-            {showAlert && renderAlert()}
-            <View style={{ flexDirection: 'row', marginVertical: mobileW * 0.03 }}>
-                <Text style={[styles.header, { flex: 1 }]}>{item.name}</Text>
-                <TouchableOpacity
-                    onPress={handleShowAlert}
-                    style={[styles.deletebutton, { flexDirection: 'row', elevation: 2 }]}
-                >
-                    {isLoading ? (
-                        <ActivityIndicator size="small" color="white" /> // Show the progress indicator when loading
-                    ) : (
-                        <View style={{ flexDirection: 'row' }}>
-                            <Text style={{ color: 'white', alignSelf: 'center', padding: 3 }}>Delete Event</Text>
-                        </View>
-                    )}
-                </TouchableOpacity>
-            </View>
-            <View style={styles.ContainerX}>
-                <Text style={[styles.header, { fontSize: 24, marginTop: 10, margin: 10 }]}>
-                    Duration
-                </Text>
-                {
-                    item.startDate == item.endDate
-                        ? <Text style={styles.lable}>{item.startDate.split('T')[0]} </Text>
-                        : <Text style={styles.lable}>{item.startDate.split('T')[0]} to {item.endDate.split('T')[0]}</Text>
-                }
-            </View>
-            <View style={styles.ContainerX}>
-                <Text style={[styles.header, { fontSize: 24, marginTop: 10, margin: 10 }]}>
-                    Targated Departments
-                </Text>
-                <Text style={styles.lable}>{item.targetedDept.join(", ")}</Text>
-            </View>
+            <ScrollView style={styles.container}>
+                {showAlert && renderAlert()}
+                <View style={{ flexDirection: 'row', marginVertical: mobileW * 0.03 }}>
+                    <Text style={[styles.header, { flex: 1 }]}>{item.name}</Text>
+                    <TouchableOpacity
+                        onPress={handleShowAlert}
+                        style={[styles.deletebutton, { flexDirection: 'row', elevation: 2 }]}
+                    >
+                        {isLoading ? (
+                            <ActivityIndicator size="small" color="white" /> // Show the progress indicator when loading
+                        ) : (
+                            <View style={{ flexDirection: 'row' }}>
+                                <Text style={{ color: 'white', alignSelf: 'center', padding: 3 }}>Delete Event</Text>
+                            </View>
+                        )}
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.ContainerX}>
+                    <Text style={[styles.header, { fontSize: 24, marginTop: 10, margin: 10 }]}>
+                        Duration
+                    </Text>
+                    {
+                        item.startDate == item.endDate
+                            ? <Text style={styles.lable}>{item.startDate.split('T')[0]} </Text>
+                            : <Text style={styles.lable}>{item.startDate.split('T')[0]} to {item.endDate.split('T')[0]}</Text>
+                    }
+                </View>
+                <View style={styles.ContainerX}>
+                    <Text style={[styles.header, { fontSize: 24, marginTop: 10, margin: 10 }]}>
+                        Targated Department
+                    </Text>
+                    <Text style={styles.lable}>{item.targetedDept.join(", ")}</Text>
+                </View>
+            </ScrollView>
+            <TouchableOpacity
+                onPress={() => { navigation.navigate('EditAcadmicEventPage', { item }) }}
+                style={{ height: mobileW * 0.12, width: mobileW * 0.12, backgroundColor: 'rgba(62, 168, 232,1)', position: 'absolute', alignSelf: 'flex-start', marginTop: mobileW * 1.95, borderRadius: mobileW * 0.12, marginLeft: mobileW * 0.83, alignItems: 'center' }}>
+                <Icon
+                    name="pencil"
+                    size={28}
+                    color='white'
+                    style={{ justifyContent: 'center', alignSelf: 'center', marginVertical: 8 }}
+                />
+            </TouchableOpacity>
         </View>
     );
 };
