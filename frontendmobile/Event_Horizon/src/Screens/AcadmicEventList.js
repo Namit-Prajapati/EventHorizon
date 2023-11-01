@@ -5,7 +5,7 @@ import { API_IP } from "@env";
 
 let mobileW = Dimensions.get('window').width;
 
-const ListVenuePage = ({ route }) => {
+const ListAcadmicEventsPage = ({ route }) => {
     const navigation = useNavigation();
 
     const [refreshing, setRefreshing] = useState(false);
@@ -21,20 +21,20 @@ const ListVenuePage = ({ route }) => {
     }, []);
 
     useEffect(() => {
-        fetchData();
+        fetchAllAcadmicEventData();
     }, []);
 
     useEffect(() => {
         console.log(data);
     }, [data]);
 
-    const fetchData = async () => {
+    const fetchAllAcadmicEventData = async () => {
         console.log("hello this is fetch");
         try {
-            const response = await fetch(API_IP + 'admin/getallvenue/'); // Replace with your API endpoint
+            const response = await fetch(API_IP + 'admin/getallacadevent/'); // Replace with your API endpoint
             const result = await response.json();
 
-            setData(result.venues);
+            setData(result.academicEvents);
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -42,19 +42,19 @@ const ListVenuePage = ({ route }) => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.header}>Venues</Text>
+            <Text style={styles.header}>Acadmic Events</Text>
             {
                 data ?
                     <FlatList
                         data={data}
                         keyExtractor={(item) => item._id}
                         renderItem={({ item }) => (
-                            <TouchableOpacity style={styles.venueContainer} onPress={() => { navigation.navigate('DetailedVenuePage', { item }) }}>
-                                <Image source={{ uri: API_IP + item.venueImages[0] }} style={styles.image} />
+                            <TouchableOpacity style={styles.venueContainer} onPress={() => { navigation.navigate('DetaailedAcadmicEventsPage', { item }) }}>
+                                {/* <Image source={{ uri: API_IP + item.venueImages[0] }} style={styles.image} /> */}
                                 <View style={styles.venueInfo}>
                                     <Text style={styles.venueName}>{item.name}</Text>
-                                    <Text style={styles.venueCapacity}>Capacity: {item.capacity}</Text>
-                                    <Text style={styles.venueDescription}>{item.description.substring(0, 30)} {item.description.length < 30 ? null : "..."}</Text>
+                                    <Text style={styles.venueDescription}>From {item.startDate.split('T')[0]} to {item.endDate.split('T')[0]}</Text>
+                                    <Text style={styles.venueCapacity}>Targeted Departments: {item.targetedDept.join(", ")}</Text>
                                 </View>
                             </TouchableOpacity>
                         )}
@@ -120,4 +120,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ListVenuePage;
+export default ListAcadmicEventsPage;

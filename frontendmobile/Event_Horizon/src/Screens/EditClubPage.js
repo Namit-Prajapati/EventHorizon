@@ -1,20 +1,50 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, Image, StyleSheet, TouchableOpacity, ScrollView, Dimensions, FlatList, ActivityIndicator } from 'react-native';
-import ImagePicker from 'react-native-image-crop-picker';
+import { View, Text, TextInput, Button, Image, RefreshControl, StyleSheet, TouchableOpacity, ScrollView, Dimensions, FlatList, ActivityIndicator } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { API_IP } from "@env";
 import { useNavigation } from '@react-navigation/native';
 
 const mobileW = Dimensions.get('window').width;
 
-const CreateClubPage = () => {
+const EditClubPage = () => {
 
     const navigator = useNavigation();
 
     const [clubName, setclubName] = useState('');
     const [facultyEmail, setFacultyEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
+    const [data, setData] = useState(null);
 
-   
+    const onRefresh = React.useCallback(() => {
+        setRefreshing(true);
+        console.log("hello");
+        fetchData();
+        setTimeout(() => {
+            setRefreshing(false);
+        }, 1000);
+    }, []);
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    useEffect(() => {
+        console.log(data);
+    }, [data]);
+
+    const fetchData = async () => {
+        console.log("hello this is fetch");
+        try {
+            const response = await fetch(API_IP + 'admin/getallclub'); // Replace with your API endpoint
+            const result = await response.json();
+
+            setData(result.clubs);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+
     const sendDataToAPI = async () => {
         setIsLoading(true);
         console.log('Create Venue');
@@ -65,44 +95,31 @@ const CreateClubPage = () => {
 
 
     return (
-        <ScrollView style={styles.container}>
-            <Text style={styles.heading}>Create Club</Text>
-            <Text style={styles.label}>Club Name:</Text>
-            <TextInput
-                style={styles.input}
-                onChangeText={setclubName}
-                value={clubName}
-                placeholder={'Enter Club Name'}
-                color={'black'}
-                placeholderTextColor={'rgba(0,0,0,0.5)'}
-            />
-            <View style={{ flexDirection: 'row', justifyContent: "space-between", marginTop: 20 }}></View>
-
-            <Text style={styles.label}>Faculty Email:</Text>
-            <TextInput
-                style={styles.input}
-                onChangeText={setFacultyEmail}
-                value={facultyEmail}
-                placeholder={'Enter Faculty Email'}
-                color={'black'}
-                placeholderTextColor={'rgba(0,0,0,0.5)'}
-            />
-
-            <TouchableOpacity style={styles.Button}
-                onPress={sendDataToAPI}
-            >
-                {isLoading ? (
-                    <ActivityIndicator size="small" color="white" /> // Show the progress indicator when loading
-                ) : (
-                    <Text style={{
-                        fontWeight: 'bold',
-                        fontSize: mobileW * .05,
-                        color: 'white'
-                    }}>Create Club</Text>
-                )}
-
-            </TouchableOpacity>
-        </ScrollView>
+        <View style={styles.container}>
+            <Text style={styles.heading}>Edit Club</Text>
+            {
+                data ?
+                    <FlatList
+                        data={data}
+                        keyExtractor={(item) => item._id}
+                        renderItem={({ item }) => (
+                            <TouchableOpacity style={styles.venueContainer} onPress={() => { navigator.navigate('EditClubByIDPage', { item }) }}>
+                                <View style={styles.club}>
+                                    <Text style={styles.label}>{item.name}</Text>
+                                    <Icon name='enter-outline' size={24} color="rgba(0, 0, 0, .7)" style={{ marginRight: 10 }} />
+                                </View>
+                            </TouchableOpacity>
+                        )}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={refreshing}
+                                onRefresh={onRefresh}
+                            />
+                        }
+                    /> :
+                    null
+            }
+        </View>
     );
 };
 
@@ -113,7 +130,7 @@ const styles = StyleSheet.create({
     },
     heading: {
         fontSize: 28,
-        marginTop: 10,
+        marginVertical: "4%",
         color: 'black',
         marginLeft: mobileW * 0.04,
         fontWeight: '800',
@@ -131,17 +148,20 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 20,
-        marginTop: 5,
+        // marginTop: 5,
         color: 'black',
         marginLeft: mobileW * 0.04,
         fontWeight: '600',
+        flex: 1,
     },
-    input: {
+    club: {
         borderColor: 'rgba(61,156,211,0.5)',
         borderWidth: mobileW * .005,
         marginHorizontal: mobileW * 0.04,
         borderRadius: 10,
-        paddingLeft: 10,
+        marginBottom: mobileW * 0.03,
+        padding: "2%",
+        flexDirection: 'row'
     },
     fileInputButton: {
         backgroundColor: 'rgba(62, 168, 232, 1)',
@@ -170,4 +190,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default CreateClubPage;  
+export default EditClubPage;  

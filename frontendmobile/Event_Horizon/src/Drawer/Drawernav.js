@@ -11,6 +11,8 @@ import CreateVenuePage from '../Screens/CreateVenue';
 import ListVenuePage from '../Screens/ListVenuePage';
 import CreateClubPage from '../Screens/CreateClubPage';
 import CreateAcadmicEventPage from '../Screens/CreateAcadmicEventPage';
+import EditClubPage from '../Screens/EditClubPage';
+import ListAcadmicEventsPage from '../Screens/AcadmicEventList';
 const Drawer = createDrawerNavigator();
 const Xyz = ({ navigation }) => {
     return (
@@ -32,6 +34,13 @@ const Xyz = ({ navigation }) => {
             <Drawer.Screen
                 name="CreateClubPage"
                 component={CreateClubPage}
+                options={{
+                    header: () => <NavBar />,
+                }}
+            />
+            <Drawer.Screen
+                name="EditClubPage"
+                component={EditClubPage}
                 options={{
                     header: () => <NavBar />,
                 }}
@@ -60,6 +69,13 @@ const Xyz = ({ navigation }) => {
             <Drawer.Screen
                 name="ListVenuePage"
                 component={ListVenuePage}
+                options={{
+                    header: () => <NavBar />,
+                }}
+            />
+            <Drawer.Screen
+                name="ListAcadmicEventsPage"
+                component={ListAcadmicEventsPage}
                 options={{
                     header: () => <NavBar />,
                 }}

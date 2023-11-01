@@ -30,6 +30,8 @@ const CustomDrawer = ({ routes }) => {
             <CustomTouchable text="Home" onClick={() => { navigator.navigate('Home'); }} icon={'home-outline'} />
             <CustomTouchable text="Events" onClick={() => { navigator.navigate('EventPage'); }} icon={'calendar-number-outline'} />
             <CustomTouchable text="Venue List" onClick={() => { navigator.navigate('ListVenuePage'); }} icon={'business-outline'} />
+            <CustomTouchable text="Acadmic Events" onClick={() => { navigator.navigate('ListAcadmicEventsPage'); }} icon={'business-outline'} />
+            <CustomTouchable text="Edit Club" onClick={() => { navigator.navigate('EditClubPage'); }} icon={'pencil'} />
             <CustomTouchable text="Create Club" onClick={() => { navigator.navigate('CreateClubPage'); }} icon={'add-circle-outline'} />
             <CustomTouchable text="Create Event" onClick={() => { navigator.navigate('CreateEventPage'); }} icon={'add-circle-outline'} />
             <CustomTouchable text="Create Acadmic Event" onClick={() => { navigator.navigate('CreateAcadmicEventPage'); }} icon={'add-circle-outline'} />
