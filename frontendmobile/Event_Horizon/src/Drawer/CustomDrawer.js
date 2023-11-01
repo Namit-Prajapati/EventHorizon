@@ -14,7 +14,6 @@ const CustomDrawer = ({ routes }) => {
     const [storedData, setStoredData] = useState([]);
     const [userInfo, setUserInfo] = useState({});
 
-
     useEffect(() => {
         getData();
     }, [])
