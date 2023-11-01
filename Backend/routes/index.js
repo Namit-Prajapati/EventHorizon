@@ -8,7 +8,7 @@ const changePasswordRoute = require('./changePassRoute')
 
 const Routes=[
     {
-        path:'/login',
+        path:'/auth/login',
         route:loginRoutes
     },
     {
