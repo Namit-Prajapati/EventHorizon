@@ -83,7 +83,7 @@ const CustomDrawer = ({ routes }) => {
             <CustomTouchable text="Create Event" onClick={() => { navigator.navigate('CreateEventPage'); }} icon={'add-circle-outline'} />
             <CustomTouchable text="Create Acadmic Event" onClick={() => { navigator.navigate('CreateAcadmicEventPage'); }} icon={'add-circle-outline'} />
             <CustomTouchable text="Create Venue" onClick={() => { navigator.navigate('CreateVenuePage'); }} icon={'add-circle-outline'} />
-            <CustomTouchable text="Add User" onClick={() => { navigator.navigate('CreateVenuePage'); }} icon={'add-circle-outline'} />
+            <CustomTouchable text="Add User" onClick={() => { navigator.navigate('AddUserPage'); }} icon={'add-circle-outline'} />
             <View style={styles.divider} />
             <Text style={{ color: 'gray', fontWeight: '700', fontSize: 14, marginHorizontal: 10, marginVertical: 10 }}>My Account</Text>
             <CustomTouchable text="QR code" onClick={toggleModal} icon={'qr-code-outline'} />

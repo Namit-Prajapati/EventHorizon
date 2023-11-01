@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions, Button, TouchableOpacity, TextInput, ScrollView, Image } from 'react-native';
-import DatePicker from 'react-native-date-picker';
 import { Picker } from '@react-native-picker/picker';
 import { Calendar } from 'react-native-calendars';
 import { launchImageLibrary } from 'react-native-image-picker';
 import CheckBox from '@react-native-community/checkbox';
-import { ListItem } from 'react-native-elements';
 
 const mobileW = Dimensions.get('window').width;
 
