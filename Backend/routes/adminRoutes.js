@@ -191,6 +191,9 @@ router.get("/geteventbyid", eventController.getEventById);
 // GET route for getting all of the events
 router.get("/getallevent", eventController.getAllEvent);
 
+// GET route for getting events by status
+router.get("/geteventsbystatus/:status", eventController.getEventsbyStatus);
+
 // GET route for fetching events happening on given date
 router.get("/geteventoncurrentdate/:date", eventController.getEventsOnCurrDate);
 
