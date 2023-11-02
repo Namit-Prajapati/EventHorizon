@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions, Button, TouchableOpacity, TextInput, ScrollView, Image } from 'react-native';
-import DatePicker from 'react-native-date-picker';
+import { View, Text, StyleSheet, Dimensions, Button, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { Calendar } from 'react-native-calendars';
 import { launchImageLibrary } from 'react-native-image-picker';
 import CheckBox from '@react-native-community/checkbox';
-import { ListItem } from 'react-native-elements';
+import { useNavigation } from '@react-navigation/native';
+import { API_IP } from "@env";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const mobileW = Dimensions.get('window').width;
 
@@ -16,9 +17,9 @@ const dummyVenues = [
 ];
 
 const dummyClubs = [
-    { id: 1, name: 'ACM', value: 'acm' },
-    { id: 2, name: 'GDSC', value: 'gdsc' },
-    { id: 3, name: 'UiPath', value: 'uipath' },
+    { id: 1, name: 'ACM', value: 'ACM' },
+    { id: 2, name: 'GDSC', value: 'GDSC' },
+    { id: 3, name: 'UiPath', value: 'UIPATH' },
 ];
 
 const dummyCheckbox = [ // Dummy data array for eligibility options
@@ -34,6 +35,11 @@ const dummyCheckbox = [ // Dummy data array for eligibility options
 ];
 
 const CreateEventPage = () => {
+
+    const navigator = useNavigation();
+
+    const [venueInfo, setVenueInfo] = useState([]);
+    const [clubInfo, setClubInfo] = useState([]);
     const [eventName, setEventName] = useState('');
     const [description, setDescription] = useState('');
     const [organizer, setOrganizer] = useState('');
@@ -41,20 +47,128 @@ const CreateEventPage = () => {
     const [eventPoster, setEventPoster] = useState(null);
     const [eligibility, setEligibility] = useState(dummyCheckbox);
     const [eligibilityAr, setEligibilityAr] = useState(dummyCheckbox);
-    const [selectedVenue, setSelectedVenue] = useState(dummyVenues[0].value);
+    const [selectedVenue, setSelectedVenue] = useState('');
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
     const [lastDate, setLastDate] = useState(null);
     const [disabledDate, setDisabledDate] = useState(null);
     const [markedDates, setMarkedDates] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [data, setData] = useState([]);
+    const [Cdata, setCData] = useState([]);
+    const [storedData, setStoredData] = useState([]);
+    const [userInfo, setUserInfo] = useState({});
+
+
+    useEffect(() => {
+        getData();
+    }, []);
+
+    useEffect(() => {
+        console.log(data);
+        const convertedData = data.map(venue => ({
+            id: venue._id,
+            name: venue.name,
+            value: venue._id,
+            bookedDates: venue.bookedOn
+        }));
+        console.log("Venue Data");
+        console.log(convertedData);
+        setVenueInfo(convertedData);
+    }, [data]);
+
+    useEffect(() => {
+        console.log("Clubs");
+        console.log(Cdata);
+        if (Cdata) {
+            const transformedData = Cdata.map(item => ({
+                id: item._id,
+                name: item.name,
+                value: item._id
+            }));
+            setClubInfo(transformedData);
+        }
+    }, [Cdata]);
+
+    useEffect(() => {
+        console.log("Clubs Info");
+        console.log(clubInfo);
+    }, [clubInfo]);
+
+    const fetchCData = async () => {
+        console.log("hello this is Club Data");
+        console.log(API_IP + 'faculty/getclubsoffaculty/' + userInfo.userId);
+        try {
+            const response = await fetch(API_IP + 'faculty/getclubsoffaculty/' + userInfo.userId); // Replace with your API endpoint
+            const result = await response.json();
+
+            setCData(result.facultyClubs);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+
+    const fetchData = async () => {
+        console.log("hello this is fetch");
+        try {
+            const response = await fetch(API_IP + 'admin/getallvenue/'); // Replace with your API endpoint
+            const result = await response.json();
+
+            setData(result.venues);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+
+
+    useEffect(() => {
+        console.log(storedData);
+        const convertedData = {};
+        storedData.forEach((item) => {
+            const { key, value } = item;
+            convertedData[key] = value;
+        });
+        setUserInfo(convertedData);
+
+    }, [storedData])
+
+    useEffect(() => {
+        fetchData();
+        fetchCData();
+        console.log(userInfo);
+    }, [userInfo])
+
+    const getData = async () => {
+        AsyncStorage.getAllKeys()
+            .then(async (allKeys) => {
+                // Use multiGet to retrieve the corresponding values for each key
+                const dataPairs = await AsyncStorage.multiGet(allKeys);
+                // Convert the data to a format that can be displayed
+                const data = dataPairs.map(([key, value]) => ({ key, value }));
+                setStoredData(data);
+            })
+            .catch((error) => {
+                console.error('Error retrieving data:', error);
+            });
+    }
 
     const today = new Date();
     const formattedToday = today.toISOString().split('T')[0];
 
     // console.log("formattedToday " + formattedToday);
     // console.log("Start date " + startDate);
+    useEffect(() => {
+        console.log(eventPoster)
+    }, [eventPoster])
 
-    const HandleSubmit = () => {
+
+    const HandleSubmit = async () => {
+        setIsLoading(true);
+        console.log('Create venue');
+
+        const apiUrl = `${API_IP}admin/createevent`;
+        const formData = new FormData();
+
         let temp = "";
         eligibility.forEach(dept => {
             if (dept.checked) {
@@ -64,6 +178,79 @@ const CreateEventPage = () => {
                 temp += dept.label;
             }
         });
+
+        console.log(eventName);
+        console.log(description);
+        console.log(temp);
+        console.log(selectedVenue);
+        console.log(organizer);
+        console.log(userInfo.userId);
+        console.log(lastDate);
+        console.log(startDate);
+        console.log(endDate);
+        console.log("uri:" + logoImage.uri)
+        console.log("type:" + logoImage.type)
+        console.log("name:" + logoImage.fileName)
+        console.log("uri:" + eventPoster.uri)
+        console.log("type:" + eventPoster.type)
+        console.log("name:" + eventPoster.fileName)
+
+
+        formData.append('name', eventName);
+        formData.append('description', description);
+        formData.append('targetedDept', temp);
+        formData.append('venueId', selectedVenue);
+        formData.append('clubId', organizer);
+        formData.append('facultyId', userInfo.userId);
+        formData.append('registrationDeadline', lastDate);
+        formData.append('startDate', startDate);
+        formData.append('endDate', endDate);
+        formData.append(`logo`, {
+            uri: logoImage.uri,
+            type: logoImage.type,
+            name: logoImage.fileName,
+        });
+        formData.append('banner', {
+            uri: eventPoster.uri,
+            type: eventPoster.type,
+            name: eventPoster.fileName,
+        });
+
+        await fetch(apiUrl, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        })
+
+            .then((Response) => Response.json())
+            .then((json) => {
+                console.log(json);
+                if (json.message) {
+                    alert(json.message);
+                    setEventName('');
+                    setDescription('');
+                    setOrganizer('');
+                    setLogoImage('');
+                    setEventPoster('');
+                    setEligibility(dummyCheckbox);
+                    // setSelectedVenue('');
+                    setStartDate(null);
+                    setEndDate(null);
+                    setLastDate(null);
+                    setDisabledDate(null);
+                    setMarkedDates(null);
+                    navigator.navigate('Home');
+                }
+                if (json.error) {
+                    alert(json.error);
+                }
+            })
+            .finally(() => {
+                setIsLoading(false); // Set loading state to false when API call is complete
+            });
+
     }
 
 
@@ -80,9 +267,9 @@ const CreateEventPage = () => {
                 console.log('ImagePicker Error: ', response.error);
             } else {
                 if (type === 'photo') {
-                    setLogoImage({ uri: response.assets[0].uri });
+                    setLogoImage(response.assets[0]);
                 } else if (type === 'mixed') {
-                    setEventPoster({ uri: response.assets[0].uri });
+                    setEventPoster(response.assets[0]);
                 }
             }
         });
@@ -133,13 +320,13 @@ const CreateEventPage = () => {
     }, [eligibility]);
 
     const renderPickerItemsVenues = () => {
-        return dummyVenues.map((item) => (
+        return venueInfo.map((item) => (
             <Picker.Item key={item.id} value={item.value} label={item.name} />
         ));
     };
 
     const renderPickerItemsClubs = () => {
-        return dummyClubs.map((item) => (
+        return clubInfo.map((item) => (
             <Picker.Item key={item.id} value={item.value} label={item.name} />
         ));
     };
@@ -187,7 +374,7 @@ const CreateEventPage = () => {
                 <Text style={styles.fileInputText}>Choose File</Text>
             </TouchableOpacity>
             {logoImage && (
-                <Image source={logoImage} style={styles.imagePreviewLogo} />
+                <Image source={{ uri: logoImage.uri }} style={styles.imagePreviewLogo} />
             )}
 
             {/* Poster image picker */}
@@ -196,7 +383,7 @@ const CreateEventPage = () => {
                 <Text style={styles.fileInputText}>Choose File</Text>
             </TouchableOpacity>
             {eventPoster && (
-                <Image source={eventPoster} style={styles.imagePreview} />
+                <Image source={{ uri: eventPoster.uri }} style={styles.imagePreview} />
             )}
 
             <Text style={styles.label}>Eligibility:</Text>
@@ -284,15 +471,19 @@ const CreateEventPage = () => {
 
             <TouchableOpacity style={styles.Button}
                 onPress={() => {
-                    alert(`Requested for ${selectedVenue} at ${startDate}`);
+                    HandleSubmit();
                 }}
                 disabled={startDate ? false : true}
             >
-                <Text style={{
-                    fontWeight: 'bold',
-                    fontSize: mobileW * .05,
-                    color: 'white'
-                }}>Create Event</Text>
+                {isLoading ? (
+                    <ActivityIndicator size="small" color="white" /> // Show the progress indicator when loading
+                ) : (
+                    <Text style={{
+                        fontWeight: 'bold',
+                        fontSize: mobileW * .05,
+                        color: 'white'
+                    }}>Create Event</Text>
+                )}
             </TouchableOpacity>
         </ScrollView>
     );
