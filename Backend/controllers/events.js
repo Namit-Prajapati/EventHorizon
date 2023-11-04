@@ -206,8 +206,21 @@ exports.getEventById = async (req, res, next) => {
 // GET route for getting all of the events
 exports.getAllEvent = async (req, res, next) => {
   try {
-    const events = await Event.find();
+    const events = await Event.find().populate([{path:"venueId",select:"name"},{path:"clubId",select:"name"},{path:"facultyId",select:"name"}]);
+    res.status(200).json({ events });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: "An error occurred while retrieving all events",
+    });
+  }
+};
 
+// GET route for getting events by status
+exports.getEventsbyStatus = async (req, res, next) => {
+  try {
+    const { status } = req.params;
+    const events = await Event.find({status:`${status}`}).populate([{path:"venueId",select:"name"},{path:"clubId",select:"name"},{path:"facultyId",select:"name"}]);
     res.status(200).json({ events });
   } catch (error) {
     console.error(error);
@@ -228,7 +241,7 @@ exports.getEventsOnCurrDate = async (req, res) => {
     const events = await Event.find({
       startDate: { $lte: targetDate },
       endDate: { $gte: targetDate },
-    });
+    }).populate([{path:"venueId",select:"name"},{path:"clubId",select:"name"},{path:"facultyId",select:"name"}]);
 
     res.status(200).json({ events });
   } catch (error) {
@@ -249,7 +262,7 @@ exports.getUpcomingEvents = async (req, res) => {
 
     const events = await Event.find({
       endDate: { $gte: targetDate },
-    });
+    }).populate([{path:"venueId",select:"name"},{path:"clubId",select:"name"},{path:"facultyId",select:"name"}]);
 
     res.status(200).json({ events });
   } catch (error) {
@@ -271,7 +284,7 @@ exports.getPastEvents = async (req, res) => {
 
     const events = await Event.find({
       endDate: { $lt: targetDate },
-    });
+    }).populate([{path:"venueId",select:"name"},{path:"clubId",select:"name"},{path:"facultyId",select:"name"}]);
 
     res.status(200).json({ events });
   } catch (error) {

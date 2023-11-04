@@ -20,6 +20,7 @@ var eventSchema = new Schema(
     reportFile: {
       type: String,
       trim: true,
+      default: null,
     },
     reportImages: [{ type: String }],
     logo: {

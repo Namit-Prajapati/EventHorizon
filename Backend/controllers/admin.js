@@ -586,7 +586,7 @@ exports.getAllClub = async (req, res, next) => {
 // GET route to get all requested events
 exports.getRequestedEvents = async (req, res, next) => {
   try {
-    const RequestedEvents = await Event.find({ status: "requested" });
+    const RequestedEvents = await Event.find({ status: "requested" }).populate([{path:"venueId",select:"name"},{path:"clubId",select:"name"},{path:"facultyId",select:"name"}]);
 
     res.status(200).json({ RequestedEvents });
   } catch (error) {
@@ -607,7 +607,7 @@ exports.approveEvent = async (req, res, next) => {
       return res.status(404).json({ error: "Event not found" });
     }
 
-    const venue = await Venue.findOne(updatedEvent.venueId);
+    const venue = await Venue.findOne(updatedEvent.venueId).populate([{path:"venueId",select:"name"},{path:"clubId",select:"name"},{path:"facultyId",select:"name"}]);
 
     for (
       let date = updatedEvent.startDate;
@@ -638,7 +638,7 @@ exports.declineEvent = async (req, res, next) => {
       eventId,
       { status: "rejected" }, // Set the status to 'upcoming' for approval
       { new: true }
-    );
+    ).populate([{path:"venueId",select:"name"},{path:"clubId",select:"name"},{path:"facultyId",select:"name"}]);
 
     if (!updatedEvent) {
       return res.status(404).json({ error: "Event not found" });
