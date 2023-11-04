@@ -1,5 +1,5 @@
-import React from 'react';
-import { StyleSheet, Text, View, Dimensions, Image, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, Alert, View, Dimensions, Image, ScrollView, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import CustomCard from '../Components/smallcard';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -7,6 +7,8 @@ import BNavBar from '../Components/bottomnavbar';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import { TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_IP } from "@env";
 
 
 let mobileW = Dimensions.get('window').width;
@@ -24,6 +26,114 @@ const DetailedEventPage = ({ route }) => {
     const { item } = route.params;
     const navigator = useNavigation();
 
+    const [showAlert, setShowAlert] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [storedData, setStoredData] = useState([]);
+    const [userInfo, setUserInfo] = useState({});
+    const [data, setData] = useState([]);
+
+    useEffect(() => {
+        getData();
+    }, [])
+
+    useEffect(() => {
+        console.log(storedData);
+        const convertedData = {};
+        storedData.forEach((item) => {
+            const { key, value } = item;
+            convertedData[key] = value;
+        });
+        setUserInfo(convertedData);
+    }, [storedData])
+
+    useEffect(() => {
+        console.log(userInfo);
+        console.log("hello");
+        console.log(API_IP + 'faculty/geteventbyid?userId=' + userInfo.userId + '&eventId=' + item.id);
+        fetchData();
+    }, [userInfo])
+
+    useEffect(() => {
+        console.log(data);
+    }, [data])
+
+
+    const fetchData = async () => {
+        console.log("hello this is fetch data for event by id");
+        try {
+            const response = await fetch(API_IP + 'faculty/geteventbyid?userId=' + userInfo.userId + '&eventId=' + item.id); // Replace with your API endpoint
+            const result = await response.json();
+            setData(result);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+
+    const getData = async () => {
+        AsyncStorage.getAllKeys()
+            .then(async (allKeys) => {
+                // Use multiGet to retrieve the corresponding values for each key
+                const dataPairs = await AsyncStorage.multiGet(allKeys);
+                // Convert the data to a format that can be displayed
+                const data = dataPairs.map(([key, value]) => ({ key, value }));
+                setStoredData(data);
+            })
+            .catch((error) => {
+                console.error('Error retrieving data:', error);
+            });
+    }
+
+    const handleShowAlert = () => {
+        setShowAlert(true);
+    };
+
+    const deleteEvent = async () => {
+        setIsLoading(true);
+        console.log('Delete Event');
+
+        const apiUrl = `${API_IP}admin/deleteacadevent/${item._id}`;
+
+        await fetch(apiUrl, {
+            method: 'POST',
+        })
+            .then((Response) => Response.json())
+            .then((json) => {
+                console.log(json);
+                if (json.message) {
+                    alert(json.message);
+                    navigator.navigate('Home');
+                }
+                if (json.error) {
+                    alert(json.error);
+                }
+            })
+            .finally(() => {
+                setIsLoading(false); // Set loading state to false when API call is complete
+            });
+    };
+
+    const renderAlert = () => {
+        Alert.alert(
+            'Are you sure?',
+            'You want to Delete this Event?',
+            [
+                {
+                    text: 'No',
+                    onPress: () => setShowAlert(false),
+                    style: 'cancel',
+                },
+                {
+                    text: 'Yupp!',
+                    onPress: () => {
+                        deleteEvent();
+                        setShowAlert(false);
+                    },
+                },
+            ],
+            { cancelable: false },
+        );
+    };
+
     const navigateToEditEvent = () => {
         navigator.navigate('EditEvent', { item }); // Assuming you have set up 'EditEvent' as the screen name for EditEventPage in your navigator.
     };
@@ -31,6 +141,7 @@ const DetailedEventPage = ({ route }) => {
     return (
         <View style={styles.AppBg}>
             <ScrollView style={styles.AppBg}>
+                {showAlert && renderAlert()}
                 <View style={[styles.container, { marginTop: mobileW * .05 }]}>
                     <View style={{ flexDirection: 'row', marginHorizontal: 4, marginTop: 4 }}>
                         <Image
@@ -50,7 +161,12 @@ const DetailedEventPage = ({ route }) => {
                             }}
                         />
                         <View style={{ marginHorizontal: mobileW * 0.01 }}>
-                            <Text style={styles.eventName}>{item.EName}</Text>
+                            <View style={{ flexDirection: 'row', flex: 1 }}>
+                                <Text style={styles.eventName}>{item.EName}</Text>
+                                {
+
+                                }
+                            </View>
                             <View style={{ flexDirection: 'row', flex: 1, marginTop: mobileW * 0.02 }}>
                                 <Icon
                                     name="building-o"
@@ -122,7 +238,7 @@ const DetailedEventPage = ({ route }) => {
                         {item.Description}
                     </Text>
                 </View>
-                <View style={styles.container}>
+                {/* <View style={styles.container}>
                     <View style={{ height: mobileW * 0.9, backgroundColor: 'white' }}>
                         <View style={{
                             flexDirection: 'row',
@@ -144,7 +260,7 @@ const DetailedEventPage = ({ route }) => {
                             enableSwipeDown
                         />
                     </View>
-                </View>
+                </View> */}
             </ScrollView >
             <View style={{ height: mobileW * 0.12, backgroundColor: 'rgba(62, 168, 232,1)', justifyContent: 'center' }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', }}>
@@ -157,23 +273,45 @@ const DetailedEventPage = ({ route }) => {
                             style={{ marginHorizontal: 20 }}
                         />
                     </TouchableOpacity>
-                    <TouchableOpacity>
-                        <View style={{ backgroundColor: 'white', borderRadius: 5, width: mobileW * 0.2, height: mobileW * 0.08, alignItems: 'center', justifyContent: "center", marginRight: 20 }}>
-                            <Text style={{ color: 'black', fontWeight: 'bold' }}>Register</Text>
-                        </View>
-                    </TouchableOpacity>
+                    {
+                        userInfo.role == 'faculty' ?
+                            data.hasAccess ?
+                                // <TouchableOpacity
+                                //     onPress={handleShowAlert}
+                                //     style={[styles.deletebutton, { flexDirection: 'row', elevation: 2 }]}
+                                // >
+                                //     {isLoading ? (
+                                //         <ActivityIndicator size="small" color="white" /> // Show the progress indicator when loading
+                                //     ) : (
+                                //         <View style={{ flexDirection: 'row' }}>
+                                //             <Text style={{ color: 'white', alignSelf: 'center', padding: 3 }}>Delete Event</Text>
+                                //         </View>
+                                //     )}
+                                // </TouchableOpacity>
+                                null
+                                : null : <TouchableOpacity>
+                                <View style={{ backgroundColor: 'white', borderRadius: 5, width: mobileW * 0.2, height: mobileW * 0.08, alignItems: 'center', justifyContent: "center", marginRight: 20 }}>
+                                    <Text style={{ color: 'black', fontWeight: 'bold' }}>Register</Text>
+                                </View>
+                            </TouchableOpacity>
+                    }
+
                 </View>
             </View>
-            <TouchableOpacity
-                onPress={navigateToEditEvent}
-                style={{ height: mobileW * 0.12, width: mobileW * 0.12, backgroundColor: 'rgba(62, 168, 232,1)', position: 'absolute', alignSelf: 'flex-start', marginTop: mobileW * 1.85, borderRadius: mobileW * 0.12, marginLeft: mobileW * 0.83, alignItems: 'center' }}>
-                <Icon
-                    name="pencil"
-                    size={28}
-                    color='white'
-                    style={{ justifyContent: 'center', alignSelf: 'center', marginVertical: 8 }}
-                />
-            </TouchableOpacity>
+            {
+                data.hasAccess ?
+                    <TouchableOpacity
+                        onPress={navigateToEditEvent}
+                        style={{ height: mobileW * 0.12, width: mobileW * 0.12, backgroundColor: 'rgba(62, 168, 232,1)', position: 'absolute', alignSelf: 'flex-start', marginTop: mobileW * 1.85, borderRadius: mobileW * 0.12, marginLeft: mobileW * 0.83, alignItems: 'center' }}>
+                        <Icon
+                            name="pencil"
+                            size={28}
+                            color='white'
+                            style={{ justifyContent: 'center', alignSelf: 'center', marginVertical: 8 }}
+                        />
+                    </TouchableOpacity>
+                    : null
+            }
         </View >
     );
 };
@@ -182,6 +320,15 @@ const styles = StyleSheet.create({
     AppBg: {
         flex: 1,
         backgroundColor: 'white',
+    },
+    deletebutton: {
+        color: 'white',
+        backgroundColor: 'red',
+        alignSelf: 'center',
+        padding: 5,
+        marginHorizontal: mobileW * 0.08,
+        // marginTop: mobileW * 0.04,
+        borderRadius: 7,
     },
     container: {
         // flex: 1,

@@ -6,6 +6,7 @@ import { API_IP } from "@env";
 import { useNavigation } from '@react-navigation/native';
 import EventCard from '../Components/EventCard';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 let mobileW = Dimensions.get('window').width;
@@ -106,9 +107,46 @@ const DetailedVenuePage = ({ route }) => {
     const [markedDates, setMarkedDates] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
+    const [storedData, setStoredData] = useState([]);
+    const [userInfo, setUserInfo] = useState({});
+
 
     const today = new Date();
     const formattedToday = today.toISOString().split('T')[0];
+
+
+    useEffect(() => {
+        console.log(storedData);
+        const convertedData = {};
+        storedData.forEach((item) => {
+            const { key, value } = item;
+            convertedData[key] = value;
+        });
+        setUserInfo(convertedData);
+    }, [storedData])
+
+    useEffect(() => {
+        console.log(userInfo);
+    }, [userInfo])
+
+    const getData = async () => {
+        AsyncStorage.getAllKeys()
+            .then(async (allKeys) => {
+                // Use multiGet to retrieve the corresponding values for each key
+                const dataPairs = await AsyncStorage.multiGet(allKeys);
+                // Convert the data to a format that can be displayed
+                const data = dataPairs.map(([key, value]) => ({ key, value }));
+                setStoredData(data);
+            })
+            .catch((error) => {
+                console.error('Error retrieving data:', error);
+            });
+    }
+
+    useEffect(() => {
+        getData();
+    }, [])
+
 
     useEffect(() => {
         setMarkedDates(
@@ -198,24 +236,31 @@ const DetailedVenuePage = ({ route }) => {
                 {showAlert && renderAlert()}
                 <View style={{ flexDirection: 'row' }}>
                     <Text style={[styles.header, { flex: 1 }]}>{item.name} </Text>
-                    <TouchableOpacity
-                        onPress={handleShowAlert}
-                        style={[styles.deletebutton, { flexDirection: 'row', elevation: 2 }]}
-                    >
-                        {isLoading ? (
-                            <ActivityIndicator size="small" color="white" /> // Show the progress indicator when loading
-                        ) : (
-                            <View style={{ flexDirection: 'row' }}>
-                                {/* <Icon
+                    {
+                        userInfo.role == 'admin' ?
+                            <TouchableOpacity
+                                onPress={handleShowAlert}
+                                style={[styles.deletebutton, { flexDirection: 'row', elevation: 2 }]}
+                            >
+                                {
+
+                                    isLoading ? (
+                                        <ActivityIndicator size="small" color="white" /> // Show the progress indicator when loading
+                                    ) : (
+                                        <View style={{ flexDirection: 'row' }}>
+                                            {/* <Icon
                                     name="trash"
                                     size={16}
                                     color='white'
                                     style={{ justifyContent: 'center', alignSelf: 'center', marginVertical: 8 }}
                                 /> */}
-                                <Text style={{ color: 'white', alignSelf: 'center', padding: 3 }}> Delete Venue</Text>
-                            </View>
-                        )}
-                    </TouchableOpacity>
+                                            <Text style={{ color: 'white', alignSelf: 'center', padding: 3 }}> Delete Venue</Text>
+                                        </View>
+                                    )}
+                            </TouchableOpacity>
+                            : null
+                    }
+
                 </View>
 
                 {
@@ -298,16 +343,20 @@ const DetailedVenuePage = ({ route }) => {
                     </View>
                 </View>
             </ScrollView>
-            <TouchableOpacity
-                onPress={() => { navigation.navigate('EditVenuePage', { item }) }}
-                style={{ height: mobileW * 0.12, width: mobileW * 0.12, backgroundColor: 'rgba(62, 168, 232,1)', position: 'absolute', alignSelf: 'flex-start', marginTop: mobileW * 1.95, borderRadius: mobileW * 0.12, marginLeft: mobileW * 0.83, alignItems: 'center' }}>
-                <Icon
-                    name="pencil"
-                    size={28}
-                    color='white'
-                    style={{ justifyContent: 'center', alignSelf: 'center', marginVertical: 8 }}
-                />
-            </TouchableOpacity>
+            {
+                userInfo.role == 'admin' ?
+                    <TouchableOpacity
+                        onPress={() => { navigation.navigate('EditVenuePage', { item }) }}
+                        style={{ height: mobileW * 0.12, width: mobileW * 0.12, backgroundColor: 'rgba(62, 168, 232,1)', position: 'absolute', alignSelf: 'flex-start', marginTop: mobileW * 1.95, borderRadius: mobileW * 0.12, marginLeft: mobileW * 0.83, alignItems: 'center' }}>
+                        <Icon
+                            name="pencil"
+                            size={28}
+                            color='white'
+                            style={{ justifyContent: 'center', alignSelf: 'center', marginVertical: 8 }}
+                        />
+                    </TouchableOpacity>
+                    : null
+            } 
             {/* <TouchableOpacity
                 onPress={() => { navigation.navigate('EditVenuePage', { item }) }}
                 style={{ height: mobileW * 0.12, width: mobileW * 0.12, backgroundColor: 'red', position: 'absolute', alignSelf: 'flex-start', marginTop: mobileW * 1.95, borderRadius: mobileW * 0.12, marginLeft: mobileW * 0.68, alignItems: 'center' }}>

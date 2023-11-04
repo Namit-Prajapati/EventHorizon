@@ -3,6 +3,7 @@ import { View, Text, FlatList, ScrollView, ActivityIndicator, Alert, Image, Styl
 import { useNavigation } from '@react-navigation/native';
 import { API_IP } from "@env";
 import Icon from 'react-native-vector-icons/FontAwesome';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 let mobileW = Dimensions.get('window').width;
 
@@ -11,6 +12,40 @@ const DetaailedAcadmicEventsPage = ({ route }) => {
 
     const [showAlert, setShowAlert] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [storedData, setStoredData] = useState([]);
+    const [userInfo, setUserInfo] = useState({});
+
+    useEffect(() => {
+        getData();
+    }, [])
+
+    useEffect(() => {
+        console.log(storedData);
+        const convertedData = {};
+        storedData.forEach((item) => {
+            const { key, value } = item;
+            convertedData[key] = value;
+        });
+        setUserInfo(convertedData);
+    }, [storedData])
+
+    useEffect(() => {
+        console.log(userInfo);
+    }, [userInfo])
+
+    const getData = async () => {
+        AsyncStorage.getAllKeys()
+            .then(async (allKeys) => {
+                // Use multiGet to retrieve the corresponding values for each key
+                const dataPairs = await AsyncStorage.multiGet(allKeys);
+                // Convert the data to a format that can be displayed
+                const data = dataPairs.map(([key, value]) => ({ key, value }));
+                setStoredData(data);
+            })
+            .catch((error) => {
+                console.error('Error retrieving data:', error);
+            });
+    }
 
 
     const { item } = route.params;
@@ -74,18 +109,22 @@ const DetaailedAcadmicEventsPage = ({ route }) => {
                 {showAlert && renderAlert()}
                 <View style={{ flexDirection: 'row', marginVertical: mobileW * 0.03 }}>
                     <Text style={[styles.header, { flex: 1 }]}>{item.name}</Text>
-                    <TouchableOpacity
-                        onPress={handleShowAlert}
-                        style={[styles.deletebutton, { flexDirection: 'row', elevation: 2 }]}
-                    >
-                        {isLoading ? (
-                            <ActivityIndicator size="small" color="white" /> // Show the progress indicator when loading
-                        ) : (
-                            <View style={{ flexDirection: 'row' }}>
-                                <Text style={{ color: 'white', alignSelf: 'center', padding: 3 }}>Delete Event</Text>
-                            </View>
-                        )}
-                    </TouchableOpacity>
+                    {
+                        userInfo.role == 'admin' ?
+                            <TouchableOpacity
+                                onPress={handleShowAlert}
+                                style={[styles.deletebutton, { flexDirection: 'row', elevation: 2 }]}
+                            >
+                                {isLoading ? (
+                                    <ActivityIndicator size="small" color="white" /> // Show the progress indicator when loading
+                                ) : (
+                                    <View style={{ flexDirection: 'row' }}>
+                                        <Text style={{ color: 'white', alignSelf: 'center', padding: 3 }}>Delete Event</Text>
+                                    </View>
+                                )}
+                            </TouchableOpacity>
+                            : null
+                    }
                 </View>
                 <View style={styles.ContainerX}>
                     <Text style={[styles.header, { fontSize: 24, marginTop: 10, margin: 10 }]}>
@@ -104,16 +143,21 @@ const DetaailedAcadmicEventsPage = ({ route }) => {
                     <Text style={styles.lable}>{item.targetedDept.join(", ")}</Text>
                 </View>
             </ScrollView>
-            <TouchableOpacity
-                onPress={() => { navigation.navigate('EditAcadmicEventPage', { item }) }}
-                style={{ height: mobileW * 0.12, width: mobileW * 0.12, backgroundColor: 'rgba(62, 168, 232,1)', position: 'absolute', alignSelf: 'flex-start', marginTop: mobileW * 1.95, borderRadius: mobileW * 0.12, marginLeft: mobileW * 0.83, alignItems: 'center' }}>
-                <Icon
-                    name="pencil"
-                    size={28}
-                    color='white'
-                    style={{ justifyContent: 'center', alignSelf: 'center', marginVertical: 8 }}
-                />
-            </TouchableOpacity>
+            {
+                userInfo.role == 'admin' ?
+                    <TouchableOpacity
+                        onPress={() => { navigation.navigate('EditAcadmicEventPage', { item }) }}
+                        style={{ height: mobileW * 0.12, width: mobileW * 0.12, backgroundColor: 'rgba(62, 168, 232,1)', position: 'absolute', alignSelf: 'flex-start', marginTop: mobileW * 1.95, borderRadius: mobileW * 0.12, marginLeft: mobileW * 0.83, alignItems: 'center' }}>
+                        <Icon
+                            name="pencil"
+                            size={28}
+                            color='white'
+                            style={{ justifyContent: 'center', alignSelf: 'center', marginVertical: 8 }}
+                        />
+                    </TouchableOpacity>
+                    : null
+            }
+
         </View>
     );
 };
