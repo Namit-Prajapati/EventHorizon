@@ -48,7 +48,7 @@ var userSchema = new Schema(
       required: true,
       enum: ["admin", "student", "faculty", "lord"],
     },
-    registrations: [{ type: Schema.ObjectId, ref: "Event" }],
+    registrations: [{ type: Schema.ObjectId, ref: "Event", unique: true }],
   },
   { timestamps: true }
 );
