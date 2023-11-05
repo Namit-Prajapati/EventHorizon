@@ -26,6 +26,10 @@ exports.createStudentAccess = async (req, res, next) => {
         .status(403)
         .json({ message: "Please enter a valid student email" });
     }
+    const check = await StudentAccess.findOne({eventId: eventId, studentId: student._id });
+    if(check){
+      return res.status(404).json({ error: "User already exists" });
+    }
     const newStudentAccess = new StudentAccess({
       studentId: student._id,
       facultyId,
@@ -49,7 +53,9 @@ exports.createStudentAccess = async (req, res, next) => {
 exports.getStudentAccess = async (req, res, next) => {
   try {
     const eventId  = req.params.id; //get event id from req param
-    const studentAccess = await StudentAccess.find({ eventId: eventId });
+    const studentAccess = await StudentAccess.find({ eventId: eventId }).populate([
+      { path: "studentId", select: "name" },
+    ]);
     if (studentAccess.length === 0) {
       return res
         .status(203)

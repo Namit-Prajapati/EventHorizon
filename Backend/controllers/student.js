@@ -64,17 +64,19 @@ exports.getEventById = async (req, res, next) => {
     if (event.attendees.includes(userId)) {
       hasAttended = true;
     }
-    if (studentAccess) {
-      hasAccess = true;
-      return res.status(200).json({
-        event,
-        venueName,
-        clubName,
-        canRegister,
-        isRegistered,
-        hasAttended,
-        hasAccess,
-      });
+    if(studentAccess){
+      if (studentAccess.editable === true) {
+        hasAccess = true;
+        return res.status(200).json({
+          event,
+          venueName,
+          clubName,
+          canRegister,
+          isRegistered,
+          hasAttended,
+          hasAccess,
+        });
+      }
     }
 
     for (let eve of event.targetedDept) {
@@ -256,6 +258,12 @@ exports.registerEvent = async (req, res, next) => {
     }
 
     if (event.registrations.includes(studentId)) {
+      return res
+        .status(404)
+        .json({ error: "User is already registered for this event" });
+    }
+
+    if (student.registrations.includes(eventId)) {
       return res
         .status(404)
         .json({ error: "User is already registered for this event" });
