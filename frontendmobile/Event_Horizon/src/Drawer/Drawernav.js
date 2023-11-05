@@ -15,6 +15,8 @@ import EditClubPage from '../Screens/EditClubPage';
 import ListAcadmicEventsPage from '../Screens/AcadmicEventList';
 import AddUserPage from '../Screens/AddUserPage';
 import RegisteredEventPage from '../Screens/RegisteredEventByStudent';
+import RequestedEvents from '../Screens/RequestedEvent';
+import MyEvents from '../Screens/MyEvents';
 const Drawer = createDrawerNavigator();
 const Xyz = ({ navigation }) => {
     return (
@@ -92,6 +94,20 @@ const Xyz = ({ navigation }) => {
             <Drawer.Screen
                 name="RegisteredEventPage"
                 component={RegisteredEventPage}
+                options={{
+                    header: () => <NavBar />,
+                }}
+            />
+            <Drawer.Screen
+                name="RequestedEvents"
+                component={RequestedEvents}
+                options={{
+                    header: () => <NavBar />,
+                }}
+            />
+            <Drawer.Screen
+                name="MyEvents"
+                component={MyEvents}
                 options={{
                     header: () => <NavBar />,
                 }}

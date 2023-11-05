@@ -20,7 +20,7 @@ const mobileW = Dimensions.get('window').width;
 
 
 // Main EventPage component
-const RegisteredEventPage = () => {
+const RequestedEvents = () => {
     const navigation = useNavigation();
     const [refreshing, setRefreshing] = useState(false);
     const [upcommingData, setUpcommingData] = useState([]);
@@ -97,11 +97,11 @@ const RegisteredEventPage = () => {
     const fetchUpcommingData = async () => {
         console.log("hello this is fetch data for past events");
         try {
-            const response = await fetch(API_IP + 'student/getregisteredevent/' + userInfo.userId); // Replace with your API endpoint
+            const response = await fetch(API_IP + 'admin/requested'); // Replace with your API endpoint
             const result = await response.json();
             console.log(result);
-            if (result.registrations) {
-                setUpcommingData(result.registrations);
+            if (result.RequestedEvents) {
+                setUpcommingData(result.RequestedEvents);
             }
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -126,19 +126,41 @@ const RegisteredEventPage = () => {
 
     return (
         <View style={styles.PageStyle}>
-            <Text style={styles.TitleStyle}>Event Page</Text>
-            <FlatList
-                data={upcommingEventData}
-                renderItem={renderEventCard}
-                keyExtractor={(item) => item.id.toString()}
-                ItemSeparatorComponent={flatListItemSeparator}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={onRefresh}
+            <Text style={styles.TitleStyle}>Requested Events</Text>
+            {
+                upcommingEventData.length == 0 ?
+                    <View style={{ marginTop: mobileW * 0.6 }}>
+                        <Text style={{
+                            color: 'black',
+                            fontSize: mobileW * 0.06,
+                            fontWeight: '500',
+                            alignSelf: 'center'
+                        }}>No Requested Events Found</Text>
+                        <Text style={{
+                            color: 'black',
+                            fontSize: mobileW * 0.04,
+                            fontWeight: '500',
+                            alignSelf: 'center'
+                        }}>Click Below to refresh</Text>
+                        <TouchableOpacity onPress={onRefresh} style={{ alignSelf: 'center' }}>
+                            <View style={{ backgroundColor: 'rgba(62, 168, 232,1)', borderRadius: 5, width: mobileW * 0.2, height: mobileW * 0.08, alignItems: 'center', justifyContent: "center", margin: 20 }}>
+                                <Text style={{ color: 'black', fontWeight: 'bold' }}>Refresh</Text>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                    : <FlatList
+                        data={upcommingEventData}
+                        renderItem={renderEventCard}
+                        keyExtractor={(item) => item.id.toString()}
+                        ItemSeparatorComponent={flatListItemSeparator}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={refreshing}
+                                onRefresh={onRefresh}
+                            />
+                        }
                     />
-                }
-            />
+            }
         </View>
     );
 };
@@ -147,8 +169,7 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         alignItems: 'center',
-    },
-    label: {
+    }, label: {
         color: 'black',
         marginRight: 10,
         fontSize: 18,
@@ -190,4 +211,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default RegisteredEventPage;
+export default RequestedEvents;

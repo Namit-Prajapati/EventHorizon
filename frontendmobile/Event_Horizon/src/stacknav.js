@@ -12,6 +12,7 @@ import EditVenuePage from './Screens/EditVenuePage';
 import EditClubByIDPage from './Screens/EditClubById';
 import DetaailedAcadmicEventsPage from './Screens/DetailedAcadmicVenuePage';
 import EditAcadmicEventPage from './Screens/EditAcdEvent';
+import TempAxis from './Screens/TemporaryAxisPage';
 
 const Stack = createNativeStackNavigator();
 
@@ -34,6 +35,7 @@ const Stacknav = () => {
                 <Stack.Screen name="EditClubByIDPage" component={EditClubByIDPage} options={{ headerShown: false }} />
                 <Stack.Screen name="DetaailedAcadmicEventsPage" component={DetaailedAcadmicEventsPage} options={{ headerShown: false }} />
                 <Stack.Screen name="EditAcadmicEventPage" component={EditAcadmicEventPage} options={{ headerShown: false }} />
+                <Stack.Screen name="TempAxis" component={TempAxis} options={{ headerShown: false }} />
             </Stack.Navigator>
         </NavigationContainer>
     );
