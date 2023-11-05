@@ -28,7 +28,7 @@ exports.createStudentAccess = async (req, res, next) => {
     }
     const check = await StudentAccess.findOne({eventId: eventId, studentId: student._id });
     if(check){
-      return res.status(404).json({ message: "User already exists" });
+      return res.status(404).json({ error: "User already exists" });
     }
     const newStudentAccess = new StudentAccess({
       studentId: student._id,
