@@ -261,6 +261,12 @@ exports.registerEvent = async (req, res, next) => {
         .json({ error: "User is already registered for this event" });
     }
 
+    if (student.registrations.includes(eventId)) {
+      return res
+        .status(404)
+        .json({ error: "User is already registered for this event" });
+    }
+
     event.registrations.push(studentId);
     student.registrations.push(eventId);
 
