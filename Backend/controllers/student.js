@@ -64,17 +64,19 @@ exports.getEventById = async (req, res, next) => {
     if (event.attendees.includes(userId)) {
       hasAttended = true;
     }
-    if (studentAccess.editable === true) {
-      hasAccess = true;
-      return res.status(200).json({
-        event,
-        venueName,
-        clubName,
-        canRegister,
-        isRegistered,
-        hasAttended,
-        hasAccess,
-      });
+    if(studentAccess){
+      if (studentAccess.editable === true) {
+        hasAccess = true;
+        return res.status(200).json({
+          event,
+          venueName,
+          clubName,
+          canRegister,
+          isRegistered,
+          hasAttended,
+          hasAccess,
+        });
+      }
     }
 
     for (let eve of event.targetedDept) {
