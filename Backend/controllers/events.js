@@ -118,8 +118,8 @@ exports.createEvent = async (req, res, next) => {
 // POST route to edit event
 exports.editEvent = async (req, res, Error) => {
   try {
-    if(req.error){
-      res.status(404).json( {error: req.error} );
+    if (req.error) {
+      res.status(404).json({ error: req.error });
     }
     const { id, description, targetedDept, registrationDeadline } = req.body;
 
@@ -163,8 +163,6 @@ exports.editEvent = async (req, res, Error) => {
   }
 };
 
-
-
 // GET route for fetching events using ID
 exports.getEventById = async (req, res, next) => {
   try {
@@ -186,15 +184,15 @@ exports.getEventById = async (req, res, next) => {
 
     if (event.facultyId === userId) {
       hasAccess = true;
-      return res.status(200).json({ event, venueName,  clubName, hasAccess });
+      return res.status(200).json({ event, venueName, clubName, hasAccess });
     }
 
-    if(club.facultyId.includes(userId)){
+    if (club.facultyId.includes(userId)) {
       hasAccess = true;
-      return res.status(200).json({ event, venueName,  clubName, hasAccess });
+      return res.status(200).json({ event, venueName, clubName, hasAccess });
     }
 
-    return res.status(200).json({ event, venueName,  clubName, hasAccess });
+    return res.status(200).json({ event, venueName, clubName, hasAccess });
   } catch (error) {
     console.error(error);
     res
@@ -206,7 +204,14 @@ exports.getEventById = async (req, res, next) => {
 // GET route for getting all of the events
 exports.getAllEvent = async (req, res, next) => {
   try {
-    const events = await Event.find().populate([{path:"venueId",select:"name"},{path:"clubId",select:"name"},{path:"facultyId",select:"name"}]);
+    const events = await Event.find({
+      status: { $in: ["completed", "upcoming"] },
+      // $or: [{ status: "upcoming" }, { status: "completed" }],
+    }).populate([
+      { path: "venueId", select: "name" },
+      { path: "clubId", select: "name" },
+      { path: "facultyId", select: "name" },
+    ]);
     res.status(200).json({ events });
   } catch (error) {
     console.error(error);
@@ -220,7 +225,11 @@ exports.getAllEvent = async (req, res, next) => {
 exports.getEventsbyStatus = async (req, res, next) => {
   try {
     const { status } = req.params;
-    const events = await Event.find({status:`${status}`}).populate([{path:"venueId",select:"name"},{path:"clubId",select:"name"},{path:"facultyId",select:"name"}]);
+    const events = await Event.find({ status: `${status}` }).populate([
+      { path: "venueId", select: "name" },
+      { path: "clubId", select: "name" },
+      { path: "facultyId", select: "name" },
+    ]);
     res.status(200).json({ events });
   } catch (error) {
     console.error(error);
@@ -239,59 +248,66 @@ exports.getEventsOnCurrDate = async (req, res) => {
     }
 
     const events = await Event.find({
+      status: { $in: ["completed", "upcoming"] },
       startDate: { $lte: targetDate },
       endDate: { $gte: targetDate },
-    }).populate([{path:"venueId",select:"name"},{path:"clubId",select:"name"},{path:"facultyId",select:"name"}]);
+    }).populate([
+      { path: "venueId", select: "name" },
+      { path: "clubId", select: "name" },
+      { path: "facultyId", select: "name" },
+    ]);
 
     res.status(200).json({ events });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while fetching events" });
+    res.status(500).json({ error: "An error occurred while fetching events" });
   }
 };
 
 // GET route for fetching events happening on or after today
 exports.getUpcomingEvents = async (req, res) => {
   try {
-    const targetDate = new Date(); 
+    const targetDate = new Date();
     if (isNaN(targetDate.getTime())) {
       return res.status(400).json({ error: "Invalid date format" });
     }
 
     const events = await Event.find({
+      status: "upcoming",
       endDate: { $gte: targetDate },
-    }).populate([{path:"venueId",select:"name"},{path:"clubId",select:"name"},{path:"facultyId",select:"name"}]);
+    }).populate([
+      { path: "venueId", select: "name" },
+      { path: "clubId", select: "name" },
+      { path: "facultyId", select: "name" },
+    ]);
 
     res.status(200).json({ events });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while fetching events" });
+    res.status(500).json({ error: "An error occurred while fetching events" });
   }
 };
-
 
 // GET route to get past events return only event name, logo, startDate, endDate, regDeadline, lub name
 exports.getPastEvents = async (req, res) => {
   try {
-    const targetDate = new Date(); 
+    const targetDate = new Date();
     if (isNaN(targetDate.getTime())) {
       return res.status(400).json({ error: "Invalid date format" });
     }
 
     const events = await Event.find({
+      status:"completed",
       endDate: { $lt: targetDate },
-    }).populate([{path:"venueId",select:"name"},{path:"clubId",select:"name"},{path:"facultyId",select:"name"}]);
+    }).populate([
+      { path: "venueId", select: "name" },
+      { path: "clubId", select: "name" },
+      { path: "facultyId", select: "name" },
+    ]);
 
     res.status(200).json({ events });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while fetching events" });
+    res.status(500).json({ error: "An error occurred while fetching events" });
   }
 };
-

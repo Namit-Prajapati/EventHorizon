@@ -105,7 +105,13 @@ exports.getEventById = async (req, res, next) => {
 exports.getAllEvent = async (req, res, next) => {
   try {
     const { department } = req.query; //get student dept from req query
-    const events = await Event.find().populate([{path:"venueId",select:"name"},{path:"clubId",select:"name"},{path:"facultyId",select:"name"}]);
+    const events = await Event.find({
+      status: { $in: ["completed", "upcoming"] },
+    }).populate([
+      { path: "venueId", select: "name" },
+      { path: "clubId", select: "name" },
+      { path: "facultyId", select: "name" },
+    ]);
 
     let eventByDept = [];
 
@@ -168,8 +174,13 @@ exports.getUpcomingEvents = async (req, res) => {
     }
 
     const events = await Event.find({
+      status: "upcoming",
       endDate: { $gte: targetDate },
-    }).populate([{path:"venueId",select:"name"},{path:"clubId",select:"name"},{path:"facultyId",select:"name"}]);
+    }).populate([
+      { path: "venueId", select: "name" },
+      { path: "clubId", select: "name" },
+      { path: "facultyId", select: "name" },
+    ]);
 
     let eventByDept = [];
 
@@ -200,8 +211,13 @@ exports.getPastEvents = async (req, res) => {
     }
 
     const events = await Event.find({
+      status: "completed",
       endDate: { $lt: targetDate },
-    }).populate([{path:"venueId",select:"name"},{path:"clubId",select:"name"},{path:"facultyId",select:"name"}]);
+    }).populate([
+      { path: "venueId", select: "name" },
+      { path: "clubId", select: "name" },
+      { path: "facultyId", select: "name" },
+    ]);
 
     let eventByDept = [];
 
