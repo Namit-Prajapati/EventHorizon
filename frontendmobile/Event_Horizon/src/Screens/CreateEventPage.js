@@ -65,7 +65,7 @@ const CreateEventPage = () => {
     }, []);
 
     useEffect(() => {
-        console.log(data);
+        // console.log(data);
         const convertedData = data.map(venue => ({
             id: venue._id,
             name: venue.name,
@@ -78,8 +78,8 @@ const CreateEventPage = () => {
     }, [data]);
 
     useEffect(() => {
-        console.log("Clubs");
-        console.log(Cdata);
+        // console.log("Clubs");
+        // console.log(Cdata);
         if (Cdata) {
             const transformedData = Cdata.map(item => ({
                 id: item._id,
@@ -91,38 +91,38 @@ const CreateEventPage = () => {
     }, [Cdata]);
 
     useEffect(() => {
-        console.log("Clubs Info");
-        console.log(clubInfo);
+        // console.log("Clubs Info");
+        // console.log(clubInfo);
     }, [clubInfo]);
 
     const fetchCData = async () => {
-        console.log("hello this is Club Data");
-        console.log(API_IP + 'faculty/getclubsoffaculty/' + userInfo.userId);
+        // console.log("hello this is Club Data");
+        // console.log(API_IP + 'faculty/getclubsoffaculty/' + userInfo.userId);
         try {
             const response = await fetch(API_IP + 'faculty/getclubsoffaculty/' + userInfo.userId); // Replace with your API endpoint
             const result = await response.json();
 
             setCData(result.facultyClubs);
         } catch (error) {
-            console.error('Error fetching data:', error);
+            // console.error('Error fetching data:', error);
         }
     };
 
     const fetchData = async () => {
-        console.log("hello this is fetch");
+        // console.log("hello this is fetch");
         try {
             const response = await fetch(API_IP + 'admin/getallvenue/'); // Replace with your API endpoint
             const result = await response.json();
 
             setData(result.venues);
         } catch (error) {
-            console.error('Error fetching data:', error);
+            // console.error('Error fetching data:', error);
         }
     };
 
 
     useEffect(() => {
-        console.log(storedData);
+        // console.log(storedData);
         const convertedData = {};
         storedData.forEach((item) => {
             const { key, value } = item;
@@ -135,7 +135,7 @@ const CreateEventPage = () => {
     useEffect(() => {
         fetchData();
         fetchCData();
-        console.log(userInfo);
+        // console.log(userInfo);
     }, [userInfo])
 
     const getData = async () => {
@@ -155,11 +155,6 @@ const CreateEventPage = () => {
     const today = new Date();
     const formattedToday = today.toISOString().split('T')[0];
 
-    // console.log("formattedToday " + formattedToday);
-    // console.log("Start date " + startDate);
-    useEffect(() => {
-        console.log(eventPoster)
-    }, [eventPoster])
 
 
     const HandleSubmit = async () => {
@@ -288,7 +283,7 @@ const CreateEventPage = () => {
 
     useEffect(() => {
         // Find the selected venue's booked dates
-        const venue = dummyVenues.find((venue) => venue.value === selectedVenue);
+        const venue = venueInfo.find((venue) => venue.value === selectedVenue);
         if (venue) {
             console.log(selectedVenue);
             setDisabledDate(venue.bookedDates);
@@ -301,11 +296,17 @@ const CreateEventPage = () => {
         if (disabledDate) {
             setMarkedDates(
                 disabledDate.reduce((result, date) => {
-                    result[date] = { disabled: true };
+                    result[date.split('T')[0]] = { disabled: true };
                     return result;
                 }, {}))
         }
     }, [disabledDate]);
+
+    useEffect(() => {
+        console.log(markedDates)
+
+    }, [markedDates])
+
 
     const handleDayPress = (date) => {
         setStartDate(date.dateString);

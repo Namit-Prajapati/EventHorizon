@@ -78,6 +78,7 @@ const CustomDrawer = ({ routes }) => {
                 <CustomTouchable text="Events" onClick={() => { navigator.navigate('EventPage'); }} icon={'calendar-number-outline'} />
                 <CustomTouchable text="Acadmic Events" onClick={() => { navigator.navigate('ListAcadmicEventsPage'); }} icon={'business-outline'} />
             </View>
+            
             {
                 userInfo.role != 'student' ?
                     <View>
@@ -102,6 +103,13 @@ const CustomDrawer = ({ routes }) => {
             }
             <View style={styles.divider} />
             <Text style={{ color: 'gray', fontWeight: '700', fontSize: 14, marginHorizontal: 10, marginVertical: 10 }}>My Account</Text>
+            {
+                userInfo.role == 'student' ?
+                    <View>
+                        <CustomTouchable text="Registered Events" onClick={() => { navigator.navigate('RegisteredEventPage'); }} icon={'calendar-number-outline'} />
+                    </View>
+                    : null
+            }
             {
                 userInfo.role == 'student' ?
                     <CustomTouchable text="QR code" onClick={toggleModal} icon={'qr-code-outline'} />

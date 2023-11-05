@@ -30,7 +30,7 @@ const DetailedEventPage = ({ route }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [storedData, setStoredData] = useState([]);
     const [userInfo, setUserInfo] = useState({});
-    const [data, setData] = useState([]);
+    const [data, setData] = useState(null);
 
     useEffect(() => {
         getData();
@@ -49,7 +49,11 @@ const DetailedEventPage = ({ route }) => {
     useEffect(() => {
         console.log(userInfo);
         console.log("hello");
-        console.log(API_IP + 'faculty/geteventbyid?userId=' + userInfo.userId + '&eventId=' + item.id);
+        if (userInfo.role == 'student') {
+            console.log(API_IP + 'student/getevent?userId=' + userInfo.userId + '&eventId=' + item.id);
+        } else {
+            console.log(API_IP + 'faculty/geteventbyid?userId=' + userInfo.userId + '&eventId=' + item.id);
+        }
         fetchData();
     }, [userInfo])
 
@@ -60,12 +64,27 @@ const DetailedEventPage = ({ route }) => {
 
     const fetchData = async () => {
         console.log("hello this is fetch data for event by id");
-        try {
-            const response = await fetch(API_IP + 'faculty/geteventbyid?userId=' + userInfo.userId + '&eventId=' + item.id); // Replace with your API endpoint
-            const result = await response.json();
-            setData(result);
-        } catch (error) {
-            console.error('Error fetching data:', error);
+        if (userInfo.role == 'student') {
+            try {
+                const response = await fetch(API_IP + 'student/getevent?userId=' + userInfo.userId + '&eventId=' + item.id); // Replace with your API endpoint
+                const result = await response.json();
+                if (result.event) {
+                    setData(result);
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        } else {
+            try {
+                const response = await fetch(API_IP + 'faculty/geteventbyid?userId=' + userInfo.userId + '&eventId=' + item.id); // Replace with your API endpoint
+                const result = await response.json();
+                if (result.event) {
+                    setData(result);
+                }
+                // setData(result);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
         }
     };
 
@@ -82,6 +101,41 @@ const DetailedEventPage = ({ route }) => {
                 console.error('Error retrieving data:', error);
             });
     }
+
+    const sendDataToAPI = async () => {
+        setIsLoading(true);
+        console.log('Registering');
+
+        const apiUrl = `${API_IP}student/registerevent`;
+
+        console.log()
+
+        await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                eventId: item.id,
+                studentId: userInfo.userId,
+            }),
+        })
+
+            .then((Response) => Response.json())
+            .then((json) => {
+                console.log(json);
+                if (json.message) {
+                    alert(json.message);
+                }
+                if (json.error) {
+                    alert(json.error);
+                }
+            })
+            .finally(() => {
+                setIsLoading(false); // Set loading state to false when API call is complete
+                getData();
+            });
+    };
 
     const handleShowAlert = () => {
         setShowAlert(true);
@@ -140,105 +194,104 @@ const DetailedEventPage = ({ route }) => {
 
     return (
         <View style={styles.AppBg}>
-            <ScrollView style={styles.AppBg}>
-                {showAlert && renderAlert()}
-                <View style={[styles.container, { marginTop: mobileW * .05 }]}>
-                    <View style={{ flexDirection: 'row', marginHorizontal: 4, marginTop: 4 }}>
-                        <Image
-                            source={{
-                                uri: item.EPoster,
-                            }}
-                            style={{
-                                width: mobileW * 0.2,
-                                height: mobileW * 0.2,
-                                resizeMode: 'contain',
-                                margin: mobileW * 0.02,
-                                alignSelf: 'flex-start',
-                                // borderWidth: 1,
-                                borderColor: 'gray',
-                                borderRadius: 5,
-                                // elevation: 1
-                            }}
-                        />
-                        <View style={{ marginHorizontal: mobileW * 0.01 }}>
-                            <View style={{ flexDirection: 'row', flex: 1 }}>
-                                <Text style={styles.eventName}>{item.EName}</Text>
-                                {
-
-                                }
+            {
+                data ? <View style={styles.AppBg}>
+                    <ScrollView style={styles.AppBg}>
+                        {showAlert && renderAlert()}
+                        <View style={[styles.container, { marginTop: mobileW * .05 }]}>
+                            <View style={{ flexDirection: 'row', marginHorizontal: 4, marginTop: 4 }}>
+                                <Image
+                                    source={{
+                                        uri: API_IP + data.event.logo,
+                                    }}
+                                    style={{
+                                        width: mobileW * 0.2,
+                                        height: mobileW * 0.2,
+                                        resizeMode: 'contain',
+                                        margin: mobileW * 0.02,
+                                        alignSelf: 'flex-start',
+                                        // borderWidth: 1,
+                                        borderColor: 'gray',
+                                        borderRadius: 5,
+                                        // elevation: 1
+                                    }}
+                                />
+                                <View style={{ marginHorizontal: mobileW * 0.01 }}>
+                                    <View style={{ flexDirection: 'row', flex: 1 }}>
+                                        <Text style={styles.eventName}>{data.event.name}</Text>
+                                    </View>
+                                    <View style={{ flexDirection: 'row', flex: 1, marginTop: mobileW * 0.02 }}>
+                                        <Icon
+                                            name="building-o"
+                                            size={20}
+                                            // color='rgba(62, 168, 232, 1)'
+                                            color='gray'
+                                        />
+                                        <Text style={styles.club}>{data.clubName}</Text>
+                                    </View>
+                                </View>
                             </View>
-                            <View style={{ flexDirection: 'row', flex: 1, marginTop: mobileW * 0.02 }}>
+                            <View style={{
+                                flexDirection: 'row',
+                                margin: mobileW * 0.02,
+                                marginLeft: 12,
+                            }}>
                                 <Icon
-                                    name="building-o"
+                                    name="map-marker"
                                     size={20}
                                     // color='rgba(62, 168, 232, 1)'
                                     color='gray'
                                 />
-                                <Text style={styles.club}>{item.Club}</Text>
+                                <Text style={styles.club}>{data.venueName}</Text>
+                            </View>
+                            <View style={[styles.divider, { height: 2, marginHorizontal: 12 }]}></View>
+                            <View style={[styles.container, { alignItems: 'center', elevation: 0 }]}>
+                                <View style={{ flexDirection: 'row', }}>
+                                    <CustomCard iconName="calendar-check-o" text="Date" desc={(data.event.startDate == data.event.endDate) ? data.event.startDate.split('T')[0] : data.event.startDate.split('T')[0] + " to " + data.event.endDate.split('T')[0]} />
+                                    <CustomCard iconName="clock-o" text="Registrtion Deadline" desc={data.event.registrationDeadline.split('T')[0]} />
+                                </View>
+                                <View style={{ flexDirection: 'row' }}>
+                                    <CustomCard iconName="users" text="Registered" desc={data.event.registrations.length.toString()} />
+                                    <CustomCard iconName="sticky-note-o" text="Eligiblity" desc={data.event.targetedDept.join(", ")} />
+                                </View>
                             </View>
                         </View>
-                    </View>
-                    <View style={{
-                        flexDirection: 'row',
-                        margin: mobileW * 0.02,
-                        marginLeft: 12,
-                    }}>
-                        <Icon
-                            name="map-marker"
-                            size={20}
-                            // color='rgba(62, 168, 232, 1)'
-                            color='gray'
+                        <View style={styles.divider}></View>
+                        <Image
+                            source={{
+                                uri: API_IP + data.event.banner,
+                            }}
+                            style={{
+                                height: mobileW * 1.35,
+                                width: mobileW * 0.94,
+                                resizeMode: 'contain',
+                                alignSelf: 'center',
+                                borderRadius: 8,
+                                marginVertical: 8
+                            }}
                         />
-                        <Text style={styles.club}>{item.Venue}</Text>
-                    </View>
-                    <View style={[styles.divider, { height: 2, marginHorizontal: 12 }]}></View>
-                    <View style={[styles.container, { alignItems: 'center', elevation: 0 }]}>
-                        <View style={{ flexDirection: 'row', }}>
-                            <CustomCard iconName="calendar-check-o" text="Date" desc={(item.StartEventDate == item.EndEventDate) ? item.StartEventDate : item.StartEventDate + " to " + item.EndEventDate} />
-                            <CustomCard iconName="clock-o" text="Registrtion Deadline" desc={item.LastDate} />
-                        </View>
-                        <View style={{ flexDirection: 'row' }}>
-                            <CustomCard iconName="users" text="Registered" desc={item.RegisteredStudents} />
-                            <CustomCard iconName="sticky-note-o" text="Eligiblity" desc={item.Eligibility.join(", ")} />
-                        </View>
-                    </View>
-                </View>
-                <View style={styles.divider}></View>
-                <Image
-                    source={{
-                        uri: item.Banner,
-                    }}
-                    style={{
-                        height: mobileW * 1.35,
-                        width: mobileW * 0.94,
-                        resizeMode: 'contain',
-                        alignSelf: 'center',
-                        borderRadius: 8,
-                        marginVertical: 8
-                    }}
-                />
-                <View style={styles.divider}></View>
-                <View style={styles.container}>
-                    <View style={{
-                        flexDirection: 'row',
-                        marginTop: mobileW * .03,
-                    }}>
-                        <View style={{
-                            backgroundColor: 'rgba(62, 168, 232,1)',
-                            height: 35,
-                            width: 8,
-                        }}>
+                        <View style={styles.divider}></View>
+                        <View style={styles.container}>
+                            <View style={{
+                                flexDirection: 'row',
+                                marginTop: mobileW * .03,
+                            }}>
+                                <View style={{
+                                    backgroundColor: 'rgba(62, 168, 232,1)',
+                                    height: 35,
+                                    width: 8,
+                                }}>
 
+                                </View>
+                                <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 20, marginTop: 4, marginLeft: 4 }}>
+                                    Description
+                                </Text>
+                            </View>
+                            <Text style={styles.desc}>
+                                {data.event.description}
+                            </Text>
                         </View>
-                        <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 20, marginTop: 4, marginLeft: 4 }}>
-                            Description
-                        </Text>
-                    </View>
-                    <Text style={styles.desc}>
-                        {item.Description}
-                    </Text>
-                </View>
-                {/* <View style={styles.container}>
+                        {/* <View style={styles.container}>
                     <View style={{ height: mobileW * 0.9, backgroundColor: 'white' }}>
                         <View style={{
                             flexDirection: 'row',
@@ -261,57 +314,75 @@ const DetailedEventPage = ({ route }) => {
                         />
                     </View>
                 </View> */}
-            </ScrollView >
-            <View style={{ height: mobileW * 0.12, backgroundColor: 'rgba(62, 168, 232,1)', justifyContent: 'center' }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', }}>
-                    <TouchableOpacity style={{ flex: 1 }}>
-                        <Ionicons
-                            name="chatbubbles-outline"
-                            size={35}
-                            color='white'
-                            // color='gray'
-                            style={{ marginHorizontal: 20 }}
-                        />
-                    </TouchableOpacity>
+                    </ScrollView >
                     {
-                        userInfo.role == 'faculty' ?
-                            data.hasAccess ?
-                                // <TouchableOpacity
-                                //     onPress={handleShowAlert}
-                                //     style={[styles.deletebutton, { flexDirection: 'row', elevation: 2 }]}
-                                // >
-                                //     {isLoading ? (
-                                //         <ActivityIndicator size="small" color="white" /> // Show the progress indicator when loading
-                                //     ) : (
-                                //         <View style={{ flexDirection: 'row' }}>
-                                //             <Text style={{ color: 'white', alignSelf: 'center', padding: 3 }}>Delete Event</Text>
-                                //         </View>
-                                //     )}
-                                // </TouchableOpacity>
-                                null
-                                : null : <TouchableOpacity>
-                                <View style={{ backgroundColor: 'white', borderRadius: 5, width: mobileW * 0.2, height: mobileW * 0.08, alignItems: 'center', justifyContent: "center", marginRight: 20 }}>
-                                    <Text style={{ color: 'black', fontWeight: 'bold' }}>Register</Text>
-                                </View>
-                            </TouchableOpacity>
+                        userInfo.role != 'student' ? null : <View style={{ height: mobileW * 0.12, backgroundColor: 'rgba(62, 168, 232,1)', justifyContent: 'center' }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+                                <TouchableOpacity style={{ flex: 1 }}>
+                                    <Ionicons
+                                        name="chatbubbles-outline"
+                                        size={35}
+                                        color='white'
+                                        // color='gray'
+                                        style={{ marginHorizontal: 20 }}
+                                    />
+                                </TouchableOpacity>
+                                {
+                                    data.event.status == 'completed' ?
+                                        <View style={{ backgroundColor: 'white', borderRadius: 5, width: mobileW * 0.25, height: mobileW * 0.08, alignItems: 'center', justifyContent: "center", marginRight: 20 }}>
+                                            <Text style={{ color: 'black', fontWeight: 'bold' }}>Completed!</Text>
+                                        </View> :
+                                        data.isRegistered ?
+                                            <View style={{ backgroundColor: 'rgba(62, 168, 232,1)', borderRadius: 5, width: mobileW * 0.2, height: mobileW * 0.08, alignItems: 'center', justifyContent: "center", marginRight: 20 }}>
+                                                <Text style={{ color: 'white', fontWeight: 'bold' }}>Registered</Text>
+                                            </View>
+                                            : data.canRegister ? <TouchableOpacity onPress={sendDataToAPI}>
+                                                <View style={{ backgroundColor: 'white', borderRadius: 5, width: mobileW * 0.2, height: mobileW * 0.08, alignItems: 'center', justifyContent: "center", marginRight: 20 }}>
+                                                    <Text style={{ color: 'black', fontWeight: 'bold' }}>Register</Text>
+                                                </View>
+                                            </TouchableOpacity> : <View style={{ backgroundColor: 'white', borderRadius: 5, width: mobileW * 0.4, height: mobileW * 0.08, alignItems: 'center', justifyContent: "center", marginRight: 20 }}>
+                                                <Text style={{ color: 'black', fontWeight: 'bold' }}>Registeration Ended</Text>
+                                            </View>
+                                }
+
+                                {/* {
+                                    data.hasAccess ?
+                                        // <TouchableOpacity
+                                        //     onPress={handleShowAlert}
+                                        //     style={[styles.deletebutton, { flexDirection: 'row', elevation: 2 }]}
+                                        // >
+                                        //     {isLoading ? (
+                                        //         <ActivityIndicator size="small" color="white" /> // Show the progress indicator when loading
+                                        //     ) : (
+                                        //         <View style={{ flexDirection: 'row' }}>
+                                        //             <Text style={{ color: 'white', alignSelf: 'center', padding: 3 }}>Delete Event</Text>
+                                        //         </View>
+                                        //     )}
+                                        // </TouchableOpacity>
+                                        null : null
+                                } */}
+
+                            </View>
+                        </View>
                     }
 
-                </View>
-            </View>
-            {
-                data.hasAccess ?
-                    <TouchableOpacity
-                        onPress={navigateToEditEvent}
-                        style={{ height: mobileW * 0.12, width: mobileW * 0.12, backgroundColor: 'rgba(62, 168, 232,1)', position: 'absolute', alignSelf: 'flex-start', marginTop: mobileW * 1.85, borderRadius: mobileW * 0.12, marginLeft: mobileW * 0.83, alignItems: 'center' }}>
-                        <Icon
-                            name="pencil"
-                            size={28}
-                            color='white'
-                            style={{ justifyContent: 'center', alignSelf: 'center', marginVertical: 8 }}
-                        />
-                    </TouchableOpacity>
-                    : null
+                    {
+                        data.hasAccess ?
+                            <TouchableOpacity
+                                onPress={navigateToEditEvent}
+                                style={{ height: mobileW * 0.12, width: mobileW * 0.12, backgroundColor: 'rgba(62, 168, 232,1)', position: 'absolute', alignSelf: 'flex-start', marginTop: mobileW * 1.85, borderRadius: mobileW * 0.12, marginLeft: mobileW * 0.83, alignItems: 'center' }}>
+                                <Icon
+                                    name="pencil"
+                                    size={28}
+                                    color='white'
+                                    style={{ justifyContent: 'center', alignSelf: 'center', marginVertical: 8 }}
+                                />
+                            </TouchableOpacity>
+                            : null
+                    }
+                </View> : <ActivityIndicator size='large' color="cyan" style={{ flex: 1 }} />
             }
+
         </View >
     );
 };
