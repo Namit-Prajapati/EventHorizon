@@ -46,4 +46,6 @@ router.post("/registerevent", studentController.registerEvent);
 // GET route to get all events registered by user return only event name, logo, startDate, endDate, regDeadline, club name
 router.get("/getregisteredevent/:id", studentController.registeredEvents);
 
+// GET route for fetching events happening on selected date
+router.get("/eventcurrdate/:date", studentController.getEventsOnCurrDate);
 module.exports=router

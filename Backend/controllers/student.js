@@ -283,6 +283,50 @@ exports.registerEvent = async (req, res, next) => {
   }
 };
 
+// GET route for fetching events happening on selected date and dept from req query
+exports.getEventsOnCurrDate = async (req, res) => {
+  try {
+    const targetDate = new Date(req.params.date); // Get target date from request param
+    const { department } = req.query; //get student dept from req query
+    if (isNaN(targetDate.getTime())) {
+      return res.status(400).json({ error: "Invalid date format" });
+    }
+
+    const events = await Event.find({
+      startDate: { $lte: targetDate },
+      endDate: { $gte: targetDate },
+    }).populate([
+      { path: "venueId", select: "name" },
+      { path: "clubId", select: "name" },
+    ]).select("name targetedDept clubId venueId");
+
+    let eventByDept = [];
+
+    events.forEach((event) => {
+      let departments = event.targetedDept;
+      for (let eve of departments) {
+        if (eve === department) {
+          eventByDept.push(event
+          //   {
+          //   name: event.name,
+          //   venueId: event.venueId,
+          //   clubId: event.clubId,
+          // }
+          );
+          // console.log(acadEventByDept);
+        }
+      }
+    });
+
+    res.status(200).json({ eventByDept });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching academic events" });
+  }
+};
+
 ///////////////////////////////////////////
 //////*GET Academic Event for stud*////////
 ///l//////0///////r///////|)/////////M/////
