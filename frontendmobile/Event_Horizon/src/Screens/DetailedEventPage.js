@@ -448,7 +448,7 @@ const DetailedEventPage = ({ route }) => {
                         </View>
                     }
                     {
-                        userInfo.role != 'student' ? <TouchableOpacity
+                        userInfo.role != 'student' ? data.hasAccess ? <TouchableOpacity
                             onPress={() => navigator.navigate('TempAxis', { userId: userInfo.userId, eventId: item.id, eventName: data.event.name })}
                             style={{ height: mobileW * 0.12, width: mobileW * 0.12, backgroundColor: 'rgba(62, 168, 232,1)', position: 'absolute', alignSelf: 'flex-start', marginTop: mobileW * 1.85, borderRadius: mobileW * 0.12, marginLeft: mobileW * 0.68, alignItems: 'center' }}>
                             <Ionicons
@@ -457,7 +457,7 @@ const DetailedEventPage = ({ route }) => {
                                 color='white'
                                 style={{ justifyContent: 'center', alignSelf: 'center', marginVertical: 10 }}
                             />
-                        </TouchableOpacity> : null
+                        </TouchableOpacity> : null : null
                     }
                     {
                         data.hasAccess ?

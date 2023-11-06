@@ -128,6 +128,7 @@ const CustomDrawer = ({ routes }) => {
                 </View>
             </Modal>
 
+            <CustomTouchable text="Change Password" onClick={() => { navigator.navigate('ChangePasswordPage'); }} icon={'lock-closed-outline'} />
             <CustomTouchable text="Logout" onClick={() => {
                 clearAllData();
                 navigator.reset({

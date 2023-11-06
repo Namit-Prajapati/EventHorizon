@@ -10,8 +10,10 @@ const EHome = ({ route }) => {
 
 
     const AcadmicEventData = route.params.AcadmicEvent;
+    const NormalEventData = route.params.NormalEvent;
 
-    console.log(AcadmicEventData);
+    // console.log(AcadmicEventData);
+    // console.log(NormalEventData);
 
     useEffect(() => {
         let events = {};
@@ -34,6 +36,35 @@ const EHome = ({ route }) => {
                     startTime: startDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
                     endTime: endDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
                     type: 'A', // Adding the 'type' property with the value 'A'
+                };
+
+                if (!events[dateString]) {
+                    events[dateString] = [event];
+                } else {
+                    events[dateString].push(event);
+                }
+            }
+        });
+        NormalEventData.forEach(item => {
+            const startDate = new Date(item.startDate);
+            const endDate = new Date(item.endDate);
+
+            // Calculate the number of days between the start and end date
+            const daysDiff = (endDate - startDate) / (1000 * 60 * 60 * 24);
+
+            // Iterate through the date range
+            for (let i = 0; i <= daysDiff; i++) {
+                const currentDate = new Date(startDate);
+                currentDate.setDate(startDate.getDate() + i);
+                const dateString = currentDate.toISOString().split('T')[0];
+
+                const event = {
+                    title: item.name,
+                    description: `Targeted Depts: ${item.targetedDept.join(', ')}`,
+                    startTime: startDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                    endTime: endDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                    club: item.clubId.name,
+                    type: 'N', // Adding the 'type' property with the value 'A'
                 };
 
                 if (!events[dateString]) {
@@ -90,7 +121,7 @@ const EHome = ({ route }) => {
                     <View style={EventStyles.eventItem}>
                         <Text style={EventStyles.TitleTextStyle}>{item.title}</Text>
                         {
-                            item.type == 'A' ? <Text style={EventStyles.DesTextStyle}>Acadmic Event</Text> : null
+                            item.type == 'A' ? <Text style={EventStyles.DesTextStyle}>Acadmic Event</Text> : <Text style={EventStyles.DesTextStyle}>Organized By : {item.club}</Text>
                         }
                         <Text style={EventStyles.TimeTextStyle}>{item.description}</Text>
                     </View>
