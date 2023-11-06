@@ -8,16 +8,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const mobileW = Dimensions.get('window').width;
 
-
-const DummyData1 = [
-    { _id: "4", type: "N", name: 'Appventure' },
-    { _id: "5", type: "N", name: 'AppQuest' },
-    { _id: "6", type: "N", name: 'Cyber Spur' },
-];
-
 function addTypeProperty(array) {
     for (let i = 0; i < array.length; i++) {
         array[i].type = "A";
+    }
+    return array;
+}
+function addTypeNProperty(array) {
+    for (let i = 0; i < array.length; i++) {
+        array[i].type = "N";
     }
     return array;
 }
@@ -38,10 +37,11 @@ const Home = () => {
     const [data, setData] = useState([]);
     const [nEData, setNEData] = useState([]);
     const [Today, setToday] = useState([]);
+    const [TodayAcd, setTodayAcd] = useState([]);
     const [NToday, setNToday] = useState([]);
+    const [NTodayData, setNTodayData] = useState([]);
     const [noramlEventDates, setNoramlEventDates] = useState(null);
     const [acadmicEventDates, setAcadmicEventDates] = useState(null);
-    const [mergedData, setmergedData] = useState(null);
 
     const [storedData, setStoredData] = useState([]);
     const [userInfo, setUserInfo] = useState({});
@@ -68,6 +68,7 @@ const Home = () => {
         } else {
             console.log(API_IP + 'faculty/geteventbyid?userId=' + userInfo.userId);
         }
+        FetchTodaysEvent();
         fetchAllAcadmicEventData();
         fetchTodayAcadmicEventData();
         FetchAllEvents();
@@ -139,25 +140,45 @@ const Home = () => {
     }, [data]);
 
     useEffect(() => {
+        console.log("Today");
         console.log(Today);
         const resultArray = addTypeProperty(Today);
-        setmergedData([...resultArray, ...DummyData1]);
+        setTodayAcd([...resultArray]);
+        // setmergedData([...resultArray, ...DummyData1]);
     }, [Today]);
+
+    useEffect(() => {
+        console.log("TodayAcd")
+        console.log(TodayAcd)
+    }, [TodayAcd])
+
+
+    useEffect(() => {
+        console.log("NToday");
+        console.log(NToday);
+        const resultArray = addTypeNProperty(NToday);
+        setNTodayData([...resultArray]);
+    }, [NToday])
+
+    useEffect(() => {
+        console.log("NTodayData")
+        console.log(NTodayData)
+    }, [NTodayData])
+
 
     const FetchTodaysEvent = async () => {
         console.log("hello this is FetchTodaysEvent");
         if (userInfo.role == 'student') {
             try {
-                const response = await fetch(API_IP + 'student/getallevent?department=' + userInfo.department); // Replace with your API endpoint
+                const response = await fetch(API_IP + 'student/eventcurrdate/' + formattedToday + '?department=' + userInfo.department); // Replace with your API endpoint
                 const result = await response.json();
-
                 setNToday(result.eventByDept);
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
         } else {
             try {
-                const response = await fetch(API_IP + 'faculty/getallevent'); // Replace with your API endpoint
+                const response = await fetch(API_IP + 'faculty/geteventoncurrentdate/' + formattedToday); // Replace with your API endpoint
                 const result = await response.json();
                 setNToday(result.events);
             } catch (error) {
@@ -233,6 +254,51 @@ const Home = () => {
         }
 
     };
+    
+    const getMarkedDates = () => {
+        const markedDates = {};
+
+        // Loop through academic event data and mark dates with red dots
+        data.forEach(event => {
+            const startDate = new Date(event.startDate);
+            const endDate = new Date(event.endDate);
+            const currentDate = new Date(startDate);
+
+            while (currentDate <= endDate) {
+                const dateKey = currentDate.toISOString().split('T')[0];
+                if (markedDates[dateKey]) {
+                    // If the date is already marked, increment the dot count for academic events
+                    markedDates[dateKey].dots = markedDates[dateKey].dots ? [...markedDates[dateKey].dots, { color: 'red' }] : [{ color: 'red' }];
+                } else {
+                    // If the date is not marked, create a new entry with a red dot for academic events
+                    markedDates[dateKey] = { marked: true, dots: [{ color: 'red' }] };
+                }
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+        });
+
+        // Loop through non-academic event data and mark dates with blue dots
+        nEData.forEach(event => {
+            const startDate = new Date(event.startDate);
+            const endDate = new Date(event.endDate);
+            const currentDate = new Date(startDate);
+
+            while (currentDate <= endDate) {
+                const dateKey = currentDate.toISOString().split('T')[0];
+                if (markedDates[dateKey]) {
+                    // If the date is already marked, increment the dot count for non-academic events
+                    markedDates[dateKey].dots = markedDates[dateKey].dots ? [...markedDates[dateKey].dots, { color: 'blue' }] : [{ color: 'blue' }];
+                } else {
+                    // If the date is not marked, create a new entry with a blue dot for non-academic events
+                    markedDates[dateKey] = { marked: true, dots: [{ color: 'blue' }] };
+                }
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+        });
+
+        return markedDates;
+    };
+
 
     const handleDayPress = async (day) => {
 
@@ -300,7 +366,7 @@ const Home = () => {
                 </View>
                 <View style={{ height: mobileW * 0.5 }}>
                     <FlatList
-                        data={mergedData}
+                        data={[...TodayAcd, ...NTodayData]}
                         renderItem={renderEventCard}
                         keyExtractor={(item) => item._id}
                         ItemSeparatorComponent={flatListItemSeparator}

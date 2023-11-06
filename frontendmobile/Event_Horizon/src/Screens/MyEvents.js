@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Icon from 'react-native-vector-icons/Ionicons';
 import {
     StyleSheet,
     Text,
@@ -44,7 +45,7 @@ const MyEvents = () => {
     }, [storedData])
 
     useEffect(() => {
-        console.log(userInfo.userId);
+        console.log(userInfo);
         fetchUpcommingData();
     }, [userInfo])
 
@@ -73,21 +74,6 @@ const MyEvents = () => {
 
     useEffect(() => {
         console.log(upcommingData);
-        const convertedData = upcommingData.map(item => ({
-            id: item._id,
-            EName: item.name,
-            Club: item.clubId.name,
-            EPoster: API_IP + item.logo,
-            LastDate: item.registrationDeadline.split('T')[0],
-            StartEventDate: item.startDate.split('T')[0],
-            EndEventDate: item.endDate.split('T')[0],
-            Eligibility: item.targetedDept,
-            Banner: API_IP + item.banner,
-            Description: item.description,
-        }));
-
-        console.log(convertedData);
-        setUpcommingEventData(convertedData);
     }, [upcommingData]);
 
     useEffect(() => {
@@ -97,48 +83,43 @@ const MyEvents = () => {
     const fetchUpcommingData = async () => {
         console.log("hello this is fetch data for past events");
         try {
-            const response = await fetch(API_IP + 'student/getregisteredevent/' + userInfo.userId); // Replace with your API endpoint
+            const response = await fetch(API_IP + 'faculty/getclubsoffaculty/' + userInfo.userId); // Replace with your API endpoint
             const result = await response.json();
             console.log(result);
-            if (result.registrations) {
-                setUpcommingData(result.registrations);
+            if (result.facultyClubs) {
+                setUpcommingData(result.facultyClubs);
             }
         } catch (error) {
             console.error('Error fetching data:', error);
         }
     };
 
-    // Function to render each event card in the FlatList
-    const renderEventCard = ({ item }) => {
-        return (
-            <EventCard
-                item={item}
-                onPress={() => navigation.navigate('DetailedEvent', { item })}
-            />
-        );
-    };
-
-    // Function to render a separator between event cards
-    const flatListItemSeparator = () => {
-        return <View style={{ height: mobileW * 0.01 }} />;
-    };
-
 
     return (
         <View style={styles.PageStyle}>
-            <Text style={styles.TitleStyle}>Event Page</Text>
-            <FlatList
-                data={upcommingEventData}
-                renderItem={renderEventCard}
-                keyExtractor={(item) => item.id.toString()}
-                ItemSeparatorComponent={flatListItemSeparator}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={onRefresh}
-                    />
-                }
-            />
+            <Text style={styles.TitleStyle}>My Clubs</Text>
+            {
+                upcommingData ?
+                    <FlatList
+                        data={upcommingData}
+                        keyExtractor={(item) => item._id}
+                        renderItem={({ item }) => (
+                            <TouchableOpacity onPress={() => { navigation.navigate('EventByClub', { item }) }}>
+                                <View style={styles.club}>
+                                    <Text style={styles.label}>{item.name}</Text>
+                                    <Icon name='enter-outline' size={24} color="rgba(0, 0, 0, .7)" style={{ marginRight: 10 }} />
+                                </View>
+                            </TouchableOpacity>
+                        )}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={refreshing}
+                                onRefresh={onRefresh}
+                            />
+                        }
+                    /> :
+                    null
+            }
         </View>
     );
 };
@@ -152,11 +133,21 @@ const styles = StyleSheet.create({
         color: 'black',
         marginRight: 10,
         fontSize: 18,
+        flex: 1,
     },
     PageStyle: {
         flex: 1,
         backgroundColor: 'white',
-        alignItems: 'center',
+    },
+    club: {
+        borderColor: 'rgba(61,156,211,0.5)',
+        borderWidth: mobileW * .005,
+        marginHorizontal: mobileW * 0.04,
+        borderRadius: 10,
+        marginBottom: mobileW * 0.03,
+        padding: "2%",
+        flexDirection: 'row',
+        marginTop: '4%',
     },
     TitleStyle: {
         color: 'black',
