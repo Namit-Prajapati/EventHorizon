@@ -71,6 +71,10 @@ const DetailedEventPage = ({ route }) => {
                 if (result.event) {
                     setData(result);
                 }
+                if (result.error) {
+                    alert(result.error);
+                    navigator.goBack();
+                }
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -101,6 +105,62 @@ const DetailedEventPage = ({ route }) => {
                 console.error('Error retrieving data:', error);
             });
     }
+
+    const ApproveEvent = async () => {
+        console.log('Approved');
+        const apiUrl = `${API_IP}admin/approve`;
+        await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                eventId: item.id,
+            }),
+        })
+            .then((Response) => Response.json())
+            .then((json) => {
+                console.log(json);
+                if (json.name) {
+                    alert("Approved Succesfully");
+                }
+                if (json.error) {
+                    alert(json.error);
+                }
+            })
+            .finally(() => {
+                setIsLoading(false); // Set loading state to false when API call is complete
+                getData();
+            });
+    };
+
+    const RejectEvent = async () => {
+        console.log('Reject');
+        const apiUrl = `${API_IP}admin/reject`;
+        await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                eventId: item.id,
+            }),
+        })
+            .then((Response) => Response.json())
+            .then((json) => {
+                console.log(json);
+                if (json.name) {
+                    alert("Rejected Succesfully");
+                }
+                if (json.error) {
+                    alert(json.error);
+                }
+            })
+            .finally(() => {
+                setIsLoading(false); // Set loading state to false when API call is complete
+                getData();
+            });
+    };
 
     const sendDataToAPI = async () => {
         setIsLoading(true);
@@ -316,6 +376,28 @@ const DetailedEventPage = ({ route }) => {
                 </View> */}
                     </ScrollView >
                     {
+                        userInfo.role == 'admin' ?
+                            data.event.status == 'requested' ?
+                                <View style={{ height: mobileW * 0.12, backgroundColor: 'rgba(62, 168, 232,1)', justifyContent: 'center' }}>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+                                        <View style={{ flex: 1 }} />
+                                        <TouchableOpacity onPress={RejectEvent} >
+                                            <View style={{ backgroundColor: 'white', borderRadius: 5, width: mobileW * 0.2, height: mobileW * 0.08, alignItems: 'center', justifyContent: "center" }}>
+                                                <Text style={{ color: 'red', fontWeight: 'bold' }}>Reject</Text>
+                                            </View>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity onPress={ApproveEvent} >
+                                            <View style={{ backgroundColor: 'white', borderRadius: 5, width: mobileW * 0.2, height: mobileW * 0.08, alignItems: 'center', justifyContent: "center", marginHorizontal: 20 }}>
+                                                <Text style={{ color: 'black', fontWeight: 'bold' }}>Approve</Text>
+                                            </View>
+                                        </TouchableOpacity>
+                                    </View>
+
+
+                                </View> : null
+                            : null
+                    }
+                    {
                         userInfo.role != 'student' ? null : <View style={{ height: mobileW * 0.12, backgroundColor: 'rgba(62, 168, 232,1)', justifyContent: 'center' }}>
                             <View style={{ flexDirection: 'row', alignItems: 'center', }}>
                                 <TouchableOpacity style={{ flex: 1 }}>
@@ -365,7 +447,18 @@ const DetailedEventPage = ({ route }) => {
                             </View>
                         </View>
                     }
-
+                    {
+                        userInfo.role != 'student' ? data.hasAccess ? <TouchableOpacity
+                            onPress={() => navigator.navigate('TempAxis', { userId: userInfo.userId, eventId: item.id, eventName: data.event.name })}
+                            style={{ height: mobileW * 0.12, width: mobileW * 0.12, backgroundColor: 'rgba(62, 168, 232,1)', position: 'absolute', alignSelf: 'flex-start', marginTop: mobileW * 1.85, borderRadius: mobileW * 0.12, marginLeft: mobileW * 0.68, alignItems: 'center' }}>
+                            <Ionicons
+                                name="person-add-sharp"
+                                size={24}
+                                color='white'
+                                style={{ justifyContent: 'center', alignSelf: 'center', marginVertical: 10 }}
+                            />
+                        </TouchableOpacity> : null : null
+                    }
                     {
                         data.hasAccess ?
                             <TouchableOpacity

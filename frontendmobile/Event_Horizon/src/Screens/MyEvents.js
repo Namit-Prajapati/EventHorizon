@@ -20,7 +20,7 @@ const mobileW = Dimensions.get('window').width;
 
 
 // Main EventPage component
-const RegisteredEventPage = () => {
+const MyEvents = () => {
     const navigation = useNavigation();
     const [refreshing, setRefreshing] = useState(false);
     const [upcommingData, setUpcommingData] = useState([]);
@@ -190,4 +190,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default RegisteredEventPage;
+export default MyEvents;

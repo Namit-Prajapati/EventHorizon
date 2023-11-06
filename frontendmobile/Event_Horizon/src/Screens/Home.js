@@ -4,14 +4,15 @@ import { Calendar } from 'react-native-calendars';
 import { useNavigation } from '@react-navigation/native';
 import styles from '../Stylesheet/stylesheet';
 import { API_IP } from "@env";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const mobileW = Dimensions.get('window').width;
 
 
 const DummyData1 = [
-    { _id: "4", type: "N", name: 'Test' },
-    { _id: "5", type: "N", name: 'Test' },
-    { _id: "6", type: "N", name: 'Test' },
+    { _id: "4", type: "N", name: 'Appventure' },
+    { _id: "5", type: "N", name: 'AppQuest' },
+    { _id: "6", type: "N", name: 'Cyber Spur' },
 ];
 
 function addTypeProperty(array) {
@@ -35,15 +36,82 @@ const Home = () => {
     const currentMonth = months[today.getMonth()];
 
     const [data, setData] = useState([]);
+    const [nEData, setNEData] = useState([]);
     const [Today, setToday] = useState([]);
+    const [NToday, setNToday] = useState([]);
     const [noramlEventDates, setNoramlEventDates] = useState(null);
     const [acadmicEventDates, setAcadmicEventDates] = useState(null);
     const [mergedData, setmergedData] = useState(null);
 
+    const [storedData, setStoredData] = useState([]);
+    const [userInfo, setUserInfo] = useState({});
+
     useEffect(() => {
+        getData();
+    }, [])
+
+    useEffect(() => {
+        console.log(storedData);
+        const convertedData = {};
+        storedData.forEach((item) => {
+            const { key, value } = item;
+            convertedData[key] = value;
+        });
+        setUserInfo(convertedData);
+    }, [storedData])
+
+    useEffect(() => {
+        console.log("Role : ");
+        console.log(userInfo.department);
+        if (userInfo.role == 'student') {
+            console.log(API_IP + 'student/getallacadevent?department=' + userInfo.department);
+        } else {
+            console.log(API_IP + 'faculty/geteventbyid?userId=' + userInfo.userId);
+        }
         fetchAllAcadmicEventData();
         fetchTodayAcadmicEventData();
-    }, []);
+        FetchAllEvents();
+    }, [userInfo])
+
+    const getData = async () => {
+        AsyncStorage.getAllKeys()
+            .then(async (allKeys) => {
+                // Use multiGet to retrieve the corresponding values for each key
+                const dataPairs = await AsyncStorage.multiGet(allKeys);
+                // Convert the data to a format that can be displayed
+                const data = dataPairs.map(([key, value]) => ({ key, value }));
+                setStoredData(data);
+            })
+            .catch((error) => {
+                console.error('Error retrieving data:', error);
+            });
+    }
+    useEffect(() => {
+        console.log("nEData");
+        console.log(nEData);
+        const dateArray = [];
+
+        nEData.forEach(event => {
+            const startDate = new Date(event.startDate);
+            const endDate = new Date(event.endDate);
+            const currentDate = new Date(startDate);
+
+            while (currentDate <= endDate) {
+                dateArray.push(currentDate.toISOString().split('T')[0]);
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+        });
+
+        console.log(dateArray);
+
+        setNoramlEventDates(
+            dateArray.reduce((result, date) => {
+                result[date.split('T')[0]] = { marked: true, dotColor: 'blue' };
+                return result;
+            }, {}));
+
+    }, [nEData]);
+
 
     useEffect(() => {
         console.log(data);
@@ -76,29 +144,94 @@ const Home = () => {
         setmergedData([...resultArray, ...DummyData1]);
     }, [Today]);
 
+    const FetchTodaysEvent = async () => {
+        console.log("hello this is FetchTodaysEvent");
+        if (userInfo.role == 'student') {
+            try {
+                const response = await fetch(API_IP + 'student/getallevent?department=' + userInfo.department); // Replace with your API endpoint
+                const result = await response.json();
+
+                setNToday(result.eventByDept);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        } else {
+            try {
+                const response = await fetch(API_IP + 'faculty/getallevent'); // Replace with your API endpoint
+                const result = await response.json();
+                setNToday(result.events);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+    }
+
+    const FetchAllEvents = async () => {
+        console.log("hello this is FetchAllEvents");
+        if (userInfo.role == 'student') {
+            try {
+                const response = await fetch(API_IP + 'student/getallevent?department=' + userInfo.department); // Replace with your API endpoint
+                const result = await response.json();
+
+                setNEData(result.eventByDept);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        } else {
+            try {
+                const response = await fetch(API_IP + 'faculty/getallevent'); // Replace with your API endpoint
+                const result = await response.json();
+                setNEData(result.events);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+    }
+
     const fetchAllAcadmicEventData = async () => {
         console.log("hello this is fetch");
-        try {
-            const response = await fetch(API_IP + 'admin/getallacadevent/'); // Replace with your API endpoint
-            const result = await response.json();
+        if (userInfo.role == 'student') {
+            try {
+                const response = await fetch(API_IP + 'student/getallacadevent?department=' + userInfo.department); // Replace with your API endpoint
+                const result = await response.json();
 
-            setData(result.academicEvents);
-        } catch (error) {
-            console.error('Error fetching data:', error);
+                setData(result.acadEventByDept);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        } else {
+            try {
+                const response = await fetch(API_IP + 'admin/getallacadevent/'); // Replace with your API endpoint
+                const result = await response.json();
+                setData(result.academicEvents);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
         }
     };
 
     const fetchTodayAcadmicEventData = async () => {
         console.log("hello this is fetch");
-        try {
-            const response = await fetch(API_IP + 'admin/acadeventcurrdate/' + formattedToday);
-            console.log(API_IP + 'admin/acadeventcurrdate/' + formattedToday) // Replace with your API endpoint
-            const result = await response.json();
-
-            setToday(result.academicEvents);
-        } catch (error) {
-            console.error('Error fetching data:', error);
+        if (userInfo.role == 'student') {
+            try {
+                const response = await fetch(API_IP + 'student/acadeventcurrdate/' + formattedToday + '?department=' + userInfo.department);
+                console.log(API_IP + 'admin/acadeventcurrdate/' + formattedToday) // Replace with your API endpoint
+                const result = await response.json();
+                setToday(result.acadEventByDept);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        } else {
+            try {
+                const response = await fetch(API_IP + 'admin/acadeventcurrdate/' + formattedToday);
+                console.log(API_IP + 'admin/acadeventcurrdate/' + formattedToday) // Replace with your API endpoint
+                const result = await response.json();
+                setToday(result.academicEvents);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
         }
+
     };
 
     const handleDayPress = async (day) => {
@@ -107,7 +240,7 @@ const Home = () => {
         await someAsyncOperation();
 
         // Navigate to the next screen
-        navigator.navigate('EHome', { date: day.dateString, AcadmicEvent: data });
+        navigator.navigate('EHome', { date: day.dateString, AcadmicEvent: data, NormalEvent: nEData });
     };
 
     const renderEventCard = ({ item }) => {
@@ -119,7 +252,7 @@ const Home = () => {
                 <View style={{ height: 20, width: 20, borderRadius: 20, alignSelf: 'center', backgroundColor: (item.type == 'A') ? 'red' : 'rgba(62, 168, 232,1)' }} />
                 <View style={{ alignContent: 'center', justifyContent: 'center', marginLeft: '5%' }}>
                     <Text style={{ color: 'black', fontSize: 18, fontWeight: '400' }}>{item.name}</Text>
-                    {item.type == 'N' ? <Text style={{ color: 'gray', fontSize: 14 }}>Venue</Text> : null}
+                    {item.type == 'N' ? <Text style={{ color: 'gray', fontSize: 14 }}>Lab 121</Text> : null}
                 </View>
             </View>
         );
@@ -156,6 +289,7 @@ const Home = () => {
                     onDayPress={handleDayPress}
                     markedDates={{
                         ...acadmicEventDates,
+                        ...noramlEventDates,
                         // Marked dates logic here
                     }}
                 />

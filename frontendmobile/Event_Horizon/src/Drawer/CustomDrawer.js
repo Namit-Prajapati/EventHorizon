@@ -78,7 +78,7 @@ const CustomDrawer = ({ routes }) => {
                 <CustomTouchable text="Events" onClick={() => { navigator.navigate('EventPage'); }} icon={'calendar-number-outline'} />
                 <CustomTouchable text="Acadmic Events" onClick={() => { navigator.navigate('ListAcadmicEventsPage'); }} icon={'business-outline'} />
             </View>
-            
+
             {
                 userInfo.role != 'student' ?
                     <View>
@@ -96,7 +96,7 @@ const CustomDrawer = ({ routes }) => {
                         <CustomTouchable text="Create Acadmic Event" onClick={() => { navigator.navigate('CreateAcadmicEventPage'); }} icon={'add-circle-outline'} />
                         <CustomTouchable text="Create Venue" onClick={() => { navigator.navigate('CreateVenuePage'); }} icon={'add-circle-outline'} />
                         <CustomTouchable text="Add User" onClick={() => { navigator.navigate('AddUserPage'); }} icon={'add-circle-outline'} />
-
+                        <CustomTouchable text="Requested Events" onClick={() => { navigator.navigate('RequestedEvents'); }} icon={'calendar-number-outline'} />
                     </View>
                     : null
 
@@ -107,12 +107,15 @@ const CustomDrawer = ({ routes }) => {
                 userInfo.role == 'student' ?
                     <View>
                         <CustomTouchable text="Registered Events" onClick={() => { navigator.navigate('RegisteredEventPage'); }} icon={'calendar-number-outline'} />
+                        <CustomTouchable text="QR code" onClick={toggleModal} icon={'qr-code-outline'} />
                     </View>
                     : null
             }
             {
-                userInfo.role == 'student' ?
-                    <CustomTouchable text="QR code" onClick={toggleModal} icon={'qr-code-outline'} />
+                userInfo.role == 'faculty' ?
+                    <View>
+                        <CustomTouchable text="My Events" onClick={() => { navigator.navigate('MyEvents'); }} icon={'calendar-number-outline'} />
+                    </View>
                     : null
             }
 
@@ -125,6 +128,7 @@ const CustomDrawer = ({ routes }) => {
                 </View>
             </Modal>
 
+            <CustomTouchable text="Change Password" onClick={() => { navigator.navigate('ChangePasswordPage'); }} icon={'lock-closed-outline'} />
             <CustomTouchable text="Logout" onClick={() => {
                 clearAllData();
                 navigator.reset({
