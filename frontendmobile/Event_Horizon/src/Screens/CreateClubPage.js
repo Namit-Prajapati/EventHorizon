@@ -14,7 +14,7 @@ const CreateClubPage = () => {
     const [facultyEmail, setFacultyEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-   
+
     const sendDataToAPI = async () => {
         setIsLoading(true);
         console.log('Create Venue');
@@ -112,8 +112,8 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
     },
     heading: {
-        fontSize: 28,
-        marginTop: 10,
+        fontSize: mobileW * 0.075,
+        marginTop: mobileW * 0.03,
         color: 'black',
         marginLeft: mobileW * 0.04,
         fontWeight: '800',

@@ -7,9 +7,12 @@ let mobileW = Dimensions.get('window').width;
 
 const ListAcadmicEventsPage = ({ route }) => {
     const navigation = useNavigation();
+    const today = new Date();
+    const formattedToday = today.toISOString().split('T')[0];
+
 
     const [refreshing, setRefreshing] = useState(false);
-    const [data, setData] = useState(null);
+    const [data, setData] = useState([]);
 
     const onRefresh = React.useCallback(() => {
         setRefreshing(true);
@@ -31,7 +34,7 @@ const ListAcadmicEventsPage = ({ route }) => {
     const fetchAllAcadmicEventData = async () => {
         console.log("hello this is fetch");
         try {
-            const response = await fetch(API_IP + 'admin/getallacadevent/'); // Replace with your API endpoint
+            const response = await fetch(API_IP + 'admin/acadeventafterdate/' + formattedToday); // Replace with your API endpoint
             const result = await response.json();
 
             setData(result.academicEvents);
@@ -42,9 +45,27 @@ const ListAcadmicEventsPage = ({ route }) => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.header}>Acadmic Events</Text>
+            <Text style={styles.header}>Academic Events</Text>
             {
-                data ?
+                data.length == 0 ? <View style={{ marginTop: mobileW * 0.6 }}>
+                    <Text style={{
+                        color: 'black',
+                        fontSize: mobileW * 0.06,
+                        fontWeight: '500',
+                        alignSelf: 'center'
+                    }}>No Academic events found!</Text>
+                    <Text style={{
+                        color: 'black',
+                        fontSize: mobileW * 0.04,
+                        fontWeight: '500',
+                        alignSelf: 'center'
+                    }}>Click Below to refresh</Text>
+                    <TouchableOpacity onPress={onRefresh} style={{ alignSelf: 'center' }}>
+                        <View style={{ backgroundColor: 'rgba(62, 168, 232,1)', borderRadius: 5, width: mobileW * 0.2, height: mobileW * 0.08, alignItems: 'center', justifyContent: "center", margin: 20 }}>
+                            <Text style={{ color: 'black', fontWeight: 'bold' }}>Refresh</Text>
+                        </View>
+                    </TouchableOpacity>
+                </View> :
                     <FlatList
                         data={data}
                         keyExtractor={(item) => item._id}
@@ -64,8 +85,7 @@ const ListAcadmicEventsPage = ({ route }) => {
                                 onRefresh={onRefresh}
                             />
                         }
-                    /> :
-                    null
+                    />
             }
         </View>
     );
@@ -78,10 +98,11 @@ const styles = StyleSheet.create({
 
     },
     header: {
-        fontSize: 30,
+        fontSize: mobileW * 0.075,
         fontWeight: 'bold',
         color: 'black',
-        margin: mobileW * 0.04,
+        marginVertical: mobileW * 0.03,
+        marginHorizontal: mobileW * 0.04,
         alignSelf: 'center',
     },
     venueContainer: {
@@ -102,6 +123,7 @@ const styles = StyleSheet.create({
     },
     venueInfo: {
         flex: 1,
+        paddingHorizontal: 5,
         // flexDirection : 'row'
     },
     venueName: {
@@ -117,6 +139,7 @@ const styles = StyleSheet.create({
     venueCapacity: {
         fontSize: 14,
         color: 'black',
+        marginBottom: mobileW * 0.02,
     },
 });
 

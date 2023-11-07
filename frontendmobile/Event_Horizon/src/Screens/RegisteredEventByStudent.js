@@ -126,8 +126,26 @@ const RegisteredEventPage = () => {
 
     return (
         <View style={styles.PageStyle}>
-            <Text style={styles.TitleStyle}>Event Page</Text>
-            <FlatList
+            <Text style={styles.TitleStyle}>Registered By Me</Text>
+            {upcommingEventData ? <View style={{ marginTop: mobileW * 0.6 }}>
+                <Text style={{
+                    color: 'black',
+                    fontSize: mobileW * 0.06,
+                    fontWeight: '500',
+                    alignSelf: 'center'
+                }}>No registered events found!</Text>
+                <Text style={{
+                    color: 'black',
+                    fontSize: mobileW * 0.04,
+                    fontWeight: '500',
+                    alignSelf: 'center'
+                }}>Click Below to refresh</Text>
+                <TouchableOpacity onPress={onRefresh} style={{ alignSelf: 'center' }}>
+                    <View style={{ backgroundColor: 'rgba(62, 168, 232,1)', borderRadius: 5, width: mobileW * 0.2, height: mobileW * 0.08, alignItems: 'center', justifyContent: "center", margin: 20 }}>
+                        <Text style={{ color: 'black', fontWeight: 'bold' }}>Refresh</Text>
+                    </View>
+                </TouchableOpacity>
+            </View> : <FlatList
                 data={upcommingEventData}
                 renderItem={renderEventCard}
                 keyExtractor={(item) => item.id.toString()}
@@ -138,7 +156,7 @@ const RegisteredEventPage = () => {
                         onRefresh={onRefresh}
                     />
                 }
-            />
+            />}
         </View>
     );
 };
@@ -159,8 +177,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     TitleStyle: {
+        marginTop: mobileW * 0.03,
         color: 'black',
-        fontSize: mobileW * 0.1,
+        fontSize: mobileW * 0.075,
         fontWeight: 'bold',
         alignSelf: 'center',
     },

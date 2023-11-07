@@ -254,7 +254,7 @@ const Home = () => {
         }
 
     };
-    
+
     const getMarkedDates = () => {
         const markedDates = {};
 
@@ -365,12 +365,22 @@ const Home = () => {
                     <Text style={[styles.TextStyle, { marginLeft: '2%', fontWeight: '400' }]}>Today's Event </Text>
                 </View>
                 <View style={{ height: mobileW * 0.5 }}>
-                    <FlatList
-                        data={[...TodayAcd, ...NTodayData]}
-                        renderItem={renderEventCard}
-                        keyExtractor={(item) => item._id}
-                        ItemSeparatorComponent={flatListItemSeparator}
-                    />
+                    {[...TodayAcd, ...NTodayData].length == 0 ?
+                        <View>
+                            <Text style={{
+                                color: 'black',
+                                fontSize: mobileW * 0.06,
+                                fontWeight: '500',
+                                alignSelf: 'center',
+                                marginTop: mobileW * 0.2,
+                            }}>No events found for Today!</Text>
+                        </View> : <FlatList
+                            data={[...TodayAcd, ...NTodayData]}
+                            renderItem={renderEventCard}
+                            keyExtractor={(item) => item._id}
+                            ItemSeparatorComponent={flatListItemSeparator}
+                        />}
+
                 </View>
             </View>
             {/* <BNavBar onPress={() => { drawer.current.openDrawer() }} /> */}

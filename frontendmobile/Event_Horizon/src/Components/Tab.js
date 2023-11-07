@@ -91,7 +91,8 @@ const styles = StyleSheet.create({
         marginTop: 5
     },
     tabContainer: {
-        margin: mobileW * .05,
+        marginHorizontal: mobileW * .05,
+        marginTop: mobileW * 0.03,
         flexDirection: 'row',
         borderRadius: 25,
         // borderWidth: 1,

@@ -158,8 +158,8 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
     },
     heading: {
-        fontSize: 28,
-        marginTop: 10,
+        fontSize: mobileW * 0.075,
+        marginTop: mobileW * 0.03,
         color: 'black',
         marginLeft: mobileW * 0.04,
         fontWeight: '800',

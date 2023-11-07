@@ -52,9 +52,11 @@ const styles = StyleSheet.create({
     },
     TitleStyle: {
         color: 'black',
-        fontSize: mobileW * 0.1,
+        fontSize: mobileW * 0.075,
+        marginTop: mobileW * 0.03,
         fontWeight: 'bold',
         alignSelf: 'center',
+        marginTop: mobileW * 0.03,
     },
     EventCardStyle: {
         marginTop: mobileW * 0.03,

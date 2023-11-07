@@ -96,7 +96,11 @@ const Login = ({ route }) => {
     }
 
     const goToHome = () => {
-        navigator.navigate('Xyz');
+        // navigator.navigate('Xyz');
+        navigator.reset({
+            index: 0,
+            routes: [{ name: 'Xyz' }],
+        });
     }
 
     return (

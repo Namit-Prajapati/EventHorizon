@@ -78,10 +78,11 @@ const styles = StyleSheet.create({
 
     },
     header: {
-        fontSize: 30,
+        fontSize: mobileW * 0.075,
+        marginTop: mobileW * 0.03,
         fontWeight: 'bold',
         color: 'black',
-        margin: mobileW * 0.04,
+        marginHorizontal: mobileW * 0.04,
         alignSelf: 'center',
     },
     venueContainer: {

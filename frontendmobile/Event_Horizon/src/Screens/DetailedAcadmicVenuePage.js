@@ -209,6 +209,7 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: 'black',
         marginHorizontal: mobileW * 0.04,
+        marginBottom: 10
     },
     lableDescription: {
         fontSize: 18,

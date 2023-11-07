@@ -76,33 +76,39 @@ const CustomDrawer = ({ routes }) => {
             <View>
                 <CustomTouchable text="Home" onClick={() => { navigator.navigate('Home'); }} icon={'home-outline'} />
                 <CustomTouchable text="Events" onClick={() => { navigator.navigate('EventPage'); }} icon={'calendar-number-outline'} />
-                <CustomTouchable text="Acadmic Events" onClick={() => { navigator.navigate('ListAcadmicEventsPage'); }} icon={'business-outline'} />
+                <CustomTouchable text="Academic Events" onClick={() => { navigator.navigate('ListAcadmicEventsPage'); }} icon={'business-outline'} />
             </View>
-
             {
-                userInfo.role != 'student' ?
+                userInfo.role == 'admin' ?
                     <View>
+                        <View style={styles.divider} />
+                        <Text style={styles.dividerlable}>Venues</Text>
+                        <CustomTouchable text="Create Venue" onClick={() => { navigator.navigate('CreateVenuePage'); }} icon={'add-circle-outline'} />
                         <CustomTouchable text="Venue List" onClick={() => { navigator.navigate('ListVenuePage'); }} icon={'business-outline'} />
+                        <View style={styles.divider} />
+                        <Text style={styles.dividerlable}>Clubs</Text>
+                        <CustomTouchable text="Create Club" onClick={() => { navigator.navigate('CreateClubPage'); }} icon={'add-circle-outline'} />
+                        <CustomTouchable text="Club List" onClick={() => { navigator.navigate('EditClubPage'); }} icon={'albums-outline'} />
+                        <View style={styles.divider} />
+                        <Text style={styles.dividerlable}>Events</Text>
+                        <CustomTouchable text="Create Academic Event" onClick={() => { navigator.navigate('CreateAcadmicEventPage'); }} icon={'add-circle-outline'} />
+                        <CustomTouchable text="Create Event" onClick={() => { navigator.navigate('CreateEventPage'); }} icon={'add-circle-outline'} />
+                        <CustomTouchable text="Requested Events" onClick={() => { navigator.navigate('RequestedEvents'); }} icon={'calendar-number-outline'} />
+                        <View style={styles.divider} />
+                        <Text style={styles.dividerlable}>Users</Text>
+                        <CustomTouchable text="Add User" onClick={() => { navigator.navigate('AddUserPage'); }} icon={'add-circle-outline'} />
+                    </View> : null
+            }
+            {
+                userInfo.role == 'faculty' ?
+                    <View>
                         <CustomTouchable text="Create Event" onClick={() => { navigator.navigate('CreateEventPage'); }} icon={'add-circle-outline'} />
                     </View>
                     : null
 
             }
-            {
-                userInfo.role == 'admin' ?
-                    <View>
-                        <CustomTouchable text="Edit Club" onClick={() => { navigator.navigate('EditClubPage'); }} icon={'pencil'} />
-                        <CustomTouchable text="Create Club" onClick={() => { navigator.navigate('CreateClubPage'); }} icon={'add-circle-outline'} />
-                        <CustomTouchable text="Create Acadmic Event" onClick={() => { navigator.navigate('CreateAcadmicEventPage'); }} icon={'add-circle-outline'} />
-                        <CustomTouchable text="Create Venue" onClick={() => { navigator.navigate('CreateVenuePage'); }} icon={'add-circle-outline'} />
-                        <CustomTouchable text="Add User" onClick={() => { navigator.navigate('AddUserPage'); }} icon={'add-circle-outline'} />
-                        <CustomTouchable text="Requested Events" onClick={() => { navigator.navigate('RequestedEvents'); }} icon={'calendar-number-outline'} />
-                    </View>
-                    : null
-
-            }
             <View style={styles.divider} />
-            <Text style={{ color: 'gray', fontWeight: '700', fontSize: 14, marginHorizontal: 10, marginVertical: 10 }}>My Account</Text>
+            <Text style={styles.dividerlable}>My Account</Text>
             {
                 userInfo.role == 'student' ?
                     <View>
@@ -136,6 +142,7 @@ const CustomDrawer = ({ routes }) => {
                     routes: [{ name: 'Login' }],
                 });
             }} icon={'log-out-outline'} />
+            <View style={{ height: mobileW * 0.15 }} />
         </ScrollView >
     );
 }
@@ -147,7 +154,7 @@ const CustomTouchable = ({ text, onClick, icon }) => {
             onPress={onClick}
         >
             <View style={styles.buttonContainer}>
-                <Icon name={icon} size={24} color="rgba(0, 0, 0, .7)" style={{ marginRight: 10 }} />
+                <Icon name={icon} size={19} color="rgba(0, 0, 0, .7)" style={{ marginRight: 10 }} />
                 <Text style={styles.text}>{text}</Text>
             </View>
             {/* <Icon name={icon} size={24} color="black" />
@@ -161,13 +168,13 @@ const styles = StyleSheet.create({
         backgroundColor: 'white', // Add a white background color
         // borderRadius: 10, // Adjust the border radius as needed
         // elevation: 3, // Adjust the elevation as needed
-        padding: 10,
-        marginVertical: 3,
+        padding: 8,
+        marginVertical: 2,
         // marginHorizontal: 15,
         // borderWidth: 2
     },
     text: {
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: '500',
         color: 'rgba(0, 0, 0, .7)',
     },
@@ -180,6 +187,13 @@ const styles = StyleSheet.create({
         borderBottomColor: 'rgba(0, 0, 0, 0.2)',
         marginVertical: 10,
         borderColor: 'gray',
+    },
+    dividerlable: {
+        color: 'gray',
+        fontWeight: '700',
+        fontSize: 14,
+        marginHorizontal: 10,
+        marginBottom: 7,
     },
     modalContainer: {
         flex: 1,
