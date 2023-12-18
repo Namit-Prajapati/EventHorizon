@@ -293,6 +293,7 @@ exports.getEventsOnCurrDate = async (req, res) => {
     }
 
     const events = await Event.find({
+      status: { $in: ["completed", "upcoming"] },
       startDate: { $lte: targetDate },
       endDate: { $gte: targetDate },
     }).populate([
