@@ -102,6 +102,7 @@ const CustomDrawer = ({ routes }) => {
             {
                 userInfo.role == 'faculty' ?
                     <View>
+                        <CustomTouchable text="Venue List" onClick={() => { navigator.navigate('ListVenuePage'); }} icon={'business-outline'} />
                         <CustomTouchable text="Create Event" onClick={() => { navigator.navigate('CreateEventPage'); }} icon={'add-circle-outline'} />
                     </View>
                     : null

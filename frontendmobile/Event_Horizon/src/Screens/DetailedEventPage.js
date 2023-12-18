@@ -249,7 +249,9 @@ const DetailedEventPage = ({ route }) => {
     };
 
     const navigateToEditEvent = () => {
-        navigator.navigate('EditEvent', { item }); // Assuming you have set up 'EditEvent' as the screen name for EditEventPage in your navigator.
+        console.log("data");
+        console.log(data.event);
+        navigator.navigate('EditEvent', { item: data }); // Assuming you have set up 'EditEvent' as the screen name for EditEventPage in your navigator.
     };
 
     return (
@@ -462,7 +464,7 @@ const DetailedEventPage = ({ route }) => {
                     {
                         data.hasAccess ?
                             <TouchableOpacity
-                                onPress={navigateToEditEvent}
+                                onPress={(navigateToEditEvent)}
                                 style={{ height: mobileW * 0.12, width: mobileW * 0.12, backgroundColor: 'rgba(62, 168, 232,1)', position: 'absolute', alignSelf: 'flex-start', marginTop: mobileW * 1.85, borderRadius: mobileW * 0.12, marginLeft: mobileW * 0.83, alignItems: 'center' }}>
                                 <Icon
                                     name="pencil"

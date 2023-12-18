@@ -127,7 +127,7 @@ const RegisteredEventPage = () => {
     return (
         <View style={styles.PageStyle}>
             <Text style={styles.TitleStyle}>Registered By Me</Text>
-            {upcommingEventData ? <View style={{ marginTop: mobileW * 0.6 }}>
+            {upcommingEventData.length == 0 ? <View style={{ marginTop: mobileW * 0.6 }}>
                 <Text style={{
                     color: 'black',
                     fontSize: mobileW * 0.06,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Dimensions, Image, ScrollView, TextInput, TouchableOpacity, PermissionsAndroid } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, Image, ScrollView, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
@@ -8,6 +8,7 @@ import CheckBox from '@react-native-community/checkbox';
 import { launchImageLibrary } from 'react-native-image-picker';
 import DocumentPicker from 'react-native-document-picker';
 import ImagePicker from 'react-native-image-crop-picker';
+import { API_IP } from "@env";
 
 
 let mobileW = Dimensions.get('window').width;
@@ -25,20 +26,29 @@ const dummyCheckbox = [ // Dummy data array for eligibility options
 ];
 
 const EditEventPage = ({ route }) => {
-    const { item } = route.params;
+    const item = route.params.item;
+    console.log("item");
+    console.log(item);
     const navigator = useNavigation();
 
+    const checkedLabels = item.event.targetedDept;
+    const convertedData = dummyCheckbox.map(item => {
+        if (checkedLabels.includes(item.label)) {
+            item.checked = true;
+        }
+        return item;
+    });
 
     const today = new Date();
     const formattedToday = today.toISOString().split('T')[0];
-
     // Initialize state variables for editable fields
-    const [lastDate, setLastDate] = useState(item.LastDate);
-    const [eligibility, setEligibility] = useState(dummyCheckbox);
-    const [eventPoster, setEventPoster] = useState({ uri: item.Banner });
-    const [description, setDescription] = useState(item.Description);
+    const [lastDate, setLastDate] = useState(item.event.registrationDeadline.split('T')[0]);
+    const [eligibility, setEligibility] = useState(convertedData);
+    const [eventPoster, setEventPoster] = useState({ uri: API_IP + item.event.banner });
+    const [description, setDescription] = useState(item.event.description);
     const [selectedFile, setSelectedFile] = useState(null);
     const [selectedImages, setSelectedImages] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
 
     useEffect(() => {
@@ -62,6 +72,67 @@ const EditEventPage = ({ route }) => {
         setEligibility(updatedEligibility);
     };
 
+    const HandleSubmit = async () => {
+        setIsLoading(true);
+        console.log('Update Event');
+
+        const apiUrl = `${API_IP}admin/createevent`;
+        const formData = new FormData();
+
+        let temp = "";
+        eligibility.forEach(dept => {
+            if (dept.checked) {
+                if (temp) {
+                    temp += ",";
+                }
+                temp += dept.label;
+            }
+        });
+
+        formData.append('id', item.event._id);
+        formData.append('description', description);
+        formData.append('targetedDept', temp);
+        formData.append('registrationDeadline', lastDate);
+        formData.append('logo', API_IP + item.event.logo);
+        formData.append('banner', eventPoster);
+        formData.append('images', startDate);
+        formData.append('reportFile', endDate);
+        formData.append(`logo`, {
+            uri: logoImage.uri,
+            type: logoImage.type,
+            name: logoImage.fileName,
+        });
+        formData.append('banner', {
+            uri: eventPoster.uri,
+            type: eventPoster.type,
+            name: eventPoster.fileName,
+        });
+
+        await fetch(apiUrl, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        })
+
+            .then((Response) => Response.json())
+            .then((json) => {
+                console.log(json);
+                if (json.message) {
+                    alert(json.message);
+
+                    navigator.navigate('Home');
+                }
+                if (json.error) {
+                    alert(json.error);
+                }
+            })
+            .finally(() => {
+                setIsLoading(false); // Set loading state to false when API call is complete
+            });
+
+    }
 
     const pickDocument = async () => {
         try {
@@ -69,11 +140,16 @@ const EditEventPage = ({ route }) => {
                 type: [DocumentPicker.types.allFiles],
             });
             console.log(result);
-            if ((result[0].type === "application/pdf") || (result[0].type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document")) {
+            // if ((result[0].type === "application/pdf") || (result[0].type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document")) {
+            //     setSelectedFile(result);
+            // } 
+            if (result[0].type === "application/pdf") {
                 setSelectedFile(result);
-            } else {
+            }
+            else {
                 // The selected file is not a PDF or a DOCX file.
-                alert('Please select a PDF or DOCX file.');
+                // alert('Please select a PDF or DOCX file.');
+                alert('Please select a PDF file.');
             }
         } catch (err) {
             if (DocumentPicker.isCancel(err)) {
@@ -123,7 +199,7 @@ const EditEventPage = ({ route }) => {
                     <View style={{ flexDirection: 'row', marginHorizontal: 4, marginTop: 4 }}>
                         <Image
                             source={{
-                                uri: item.EPoster,
+                                uri: API_IP + item.event.logo,
                             }}
                             style={{
                                 width: mobileW * 0.2,
@@ -138,7 +214,7 @@ const EditEventPage = ({ route }) => {
                             }}
                         />
                         <View style={{ marginHorizontal: mobileW * 0.01 }}>
-                            <Text style={styles.eventName}>{item.EName}</Text>
+                            <Text style={styles.eventName}>{item.event.name}</Text>
                             <View style={{ flexDirection: 'row', flex: 1, marginTop: mobileW * 0.02 }}>
                                 <Icon
                                     name="building-o"
@@ -146,7 +222,7 @@ const EditEventPage = ({ route }) => {
                                     // color='rgba(62, 168, 232, 1)'
                                     color='gray'
                                 />
-                                <Text style={styles.club}>{item.Club}</Text>
+                                <Text style={styles.club}>{item.clubName}</Text>
                             </View>
                         </View>
                     </View>
@@ -161,7 +237,7 @@ const EditEventPage = ({ route }) => {
                             // color='rgba(62, 168, 232, 1)'
                             color='gray'
                         />
-                        <Text style={styles.club}>{item.Venue}</Text>
+                        <Text style={styles.club}>{item.venueName}</Text>
                     </View>
                 </View>
                 <Text style={styles.label}>Edit Last Date to Register</Text>
@@ -180,7 +256,7 @@ const EditEventPage = ({ route }) => {
                         [lastDate]: { selected: true, selectedColor: 'rgba(62, 168, 232, 1)' }, // Adjust the color as needed
                     }}
                     minDate={formattedToday}
-                    maxDate={item.StartEventDate}
+                    maxDate={item.event.startDate}
                 />
 
                 <Text style={styles.label}>Edit Eligibility:</Text>
@@ -232,14 +308,37 @@ const EditEventPage = ({ route }) => {
                         : null}
                 <Text style={styles.label}>Event Images:</Text>
                 <TouchableOpacity onPress={pickImages} style={styles.fileInputButton}>
-                    <Text>Select</Text>
+                    <Text style={styles.fileInputText}>Select</Text>
                 </TouchableOpacity>
 
-                <View style={styles.imageContainer}>
-                    {selectedImages.map((image, index) => (
-                        <Image key={index} source={{ uri: image.path }} style={styles.imagePreviewx} />
-                    ))}
-                </View>
+                {
+                    selectedImages.length != 0 ?
+                        <View>
+                            <Text style={styles.label}>Selected Images</Text>
+                            <View style={styles.imageContainer}>
+                                {selectedImages.map((image, index) => (
+                                    <Image key={index} source={{ uri: image.path }} style={styles.imagePreviewx} />
+                                ))}
+                            </View>
+                        </View>
+                        : null
+                }
+
+                <TouchableOpacity style={styles.Button}
+                    onPress={() => {
+                        HandleSubmit();
+                    }}
+                >
+                    {isLoading ? (
+                        <ActivityIndicator size="small" color="white" /> // Show the progress indicator when loading
+                    ) : (
+                        <Text style={{
+                            fontWeight: 'bold',
+                            fontSize: mobileW * .05,
+                            color: 'white'
+                        }}>Update Event</Text>
+                    )}
+                </TouchableOpacity>
 
             </ScrollView>
         </View>
@@ -256,6 +355,16 @@ const styles = StyleSheet.create({
         borderWidth: mobileW * .005,
         marginHorizontal: mobileW * 0.04,
         borderRadius: 10,
+    },
+    Button: {
+        backgroundColor: 'rgba(4, 128, 200, 0.9)',
+        height: mobileW * .1,
+        width: mobileW * .4,
+        borderRadius: mobileW * .02,
+        justifyContent: 'center',
+        alignItems: 'center',
+        alignSelf: 'center',
+        margin: mobileW * .05
     },
     label: {
         fontSize: 20,
