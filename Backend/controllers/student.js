@@ -182,7 +182,7 @@ exports.getUpcomingEvents = async (req, res) => {
       { path: "venueId", select: "name" },
       { path: "clubId", select: "name" },
       { path: "facultyId", select: "name" },
-    ]);
+    ]).sort({"startDate": 1});
 
     let eventByDept = [];
 
@@ -219,7 +219,7 @@ exports.getPastEvents = async (req, res) => {
       { path: "venueId", select: "name" },
       { path: "clubId", select: "name" },
       { path: "facultyId", select: "name" },
-    ]);
+    ]).sort({"endDate": -1});
 
     let eventByDept = [];
 
@@ -433,7 +433,7 @@ exports.getAcademicEventsAfterDate = async (req, res) => {
 
     const academicEvents = await AcademicEvent.find({
       endDate: { $gte: targetDate },
-    });
+    }).sort({"startDate": 1});
 
     let acadEventByDept = [];
 

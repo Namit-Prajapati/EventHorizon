@@ -279,7 +279,7 @@ exports.getUpcomingEvents = async (req, res) => {
       { path: "venueId", select: "name" },
       { path: "clubId", select: "name" },
       { path: "facultyId", select: "name" },
-    ]);
+    ]).sort({"startDate": 1});
 
     res.status(200).json({ events });
   } catch (error) {
@@ -303,7 +303,7 @@ exports.getPastEvents = async (req, res) => {
       { path: "venueId", select: "name" },
       { path: "clubId", select: "name" },
       { path: "facultyId", select: "name" },
-    ]);
+    ]).sort({"endDate": -1});
 
     res.status(200).json({ events });
   } catch (error) {

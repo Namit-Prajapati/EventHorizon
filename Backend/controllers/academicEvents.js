@@ -66,7 +66,7 @@ exports.getAcademicEventsAfterDate = async (req, res) => {
 
     const academicEvents = await AcademicEvent.find({
       endDate: { $gte: targetDate },
-    });
+    }).sort({"startDate": 1});
 
     res.status(200).json({ academicEvents });
   } catch (error) {
