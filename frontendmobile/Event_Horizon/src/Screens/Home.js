@@ -1,10 +1,11 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, Text, DrawerLayoutAndroid, TouchableHighlight, ScrollView, FlatList, Dimensions } from 'react-native';
+import { View, Text, RefreshControl, TouchableHighlight, ScrollView, FlatList, Dimensions, Touchable } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { useNavigation } from '@react-navigation/native';
 import styles from '../Stylesheet/stylesheet';
 import { API_IP } from "@env";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 const mobileW = Dimensions.get('window').width;
 
@@ -23,6 +24,16 @@ function addTypeNProperty(array) {
 
 const Home = () => {
     const navigator = useNavigation();
+    const [refreshing, setRefreshing] = useState(false);
+
+    const onRefresh = React.useCallback(() => {
+        setRefreshing(true);
+        console.log("hello");
+        getData();
+        setTimeout(() => {
+            setRefreshing(false);
+        }, 1000);
+    }, []);
 
     const today = new Date();
     const formattedToday = today.toISOString().split('T')[0];
@@ -311,16 +322,19 @@ const Home = () => {
 
     const renderEventCard = ({ item }) => {
         return (
-            <View style={{
-                borderWidth: 1, borderColor: 'lightgray', marginHorizontal: '2%', padding: 10, flexDirection: 'row',
-                borderRadius: 5,
-            }}>
+            <TouchableOpacity
+
+                onPress={() => { item.type == 'N' ? navigator.navigate('DetailedEvent', { item: { id: item._id } }) : navigator.navigate('DetaailedAcadmicEventsPage', { item }) }}
+                style={{
+                    borderWidth: 1, borderColor: 'lightgray', marginHorizontal: '2%', padding: 10, flexDirection: 'row',
+                    borderRadius: 5,
+                }}>
                 <View style={{ height: 20, width: 20, borderRadius: 20, alignSelf: 'center', backgroundColor: (item.type == 'A') ? 'red' : 'rgba(62, 168, 232,1)' }} />
                 <View style={{ alignContent: 'center', justifyContent: 'center', marginLeft: '5%' }}>
                     <Text style={{ color: 'black', fontSize: 18, fontWeight: '400' }}>{item.name}</Text>
                     {item.type == 'N' ? <Text style={{ color: 'gray', fontSize: 14 }}>Lab 121</Text> : null}
                 </View>
-            </View>
+            </TouchableOpacity>
         );
     };
 
@@ -375,6 +389,12 @@ const Home = () => {
                                 marginTop: mobileW * 0.2,
                             }}>No events found for Today!</Text>
                         </View> : <FlatList
+                            refreshControl={
+                                <RefreshControl
+                                    refreshing={refreshing}
+                                    onRefresh={onRefresh}
+                                />
+                            }
                             data={[...TodayAcd, ...NTodayData]}
                             renderItem={renderEventCard}
                             keyExtractor={(item) => item._id}

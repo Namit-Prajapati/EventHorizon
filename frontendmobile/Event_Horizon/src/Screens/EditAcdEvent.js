@@ -191,7 +191,7 @@ const EditAcadmicEventPage = ({ route }) => {
                         fontWeight: 'bold',
                         fontSize: mobileW * .05,
                         color: 'white'
-                    }}>Create Event</Text>
+                    }}>Update Event</Text>
                 )}
             </TouchableOpacity>
         </ScrollView>

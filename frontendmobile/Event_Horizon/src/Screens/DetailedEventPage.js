@@ -13,17 +13,11 @@ import { API_IP } from "@env";
 
 let mobileW = Dimensions.get('window').width;
 
-const DummyImages = [
-    {
-        url: 'https://www.adobe.com/content/dam/www/us/en/events/overview-page/eventshub_evergreen_opengraph_1200x630_2x.jpg',
-    },
-    {
-        url: 'https://www.eventbrite.ie/blog/wp-content/uploads/2022/09/dance-event.jpg',
-    },
-];
 
 const DetailedEventPage = ({ route }) => {
+    console.log(route.params);
     const { item } = route.params;
+
     const navigator = useNavigation();
 
     const [showAlert, setShowAlert] = useState(false);
@@ -557,6 +551,7 @@ const styles = StyleSheet.create({
         // justifyContent: 'center',
         textAlign: 'justify',
         marginTop: 10,
+        paddingBottom: 20,
     },
 });
 

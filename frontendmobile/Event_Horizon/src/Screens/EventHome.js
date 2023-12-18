@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Touchable } from 'react-native';
 import { CalendarProvider, Agenda } from 'react-native-calendars';
 import styles from '../Stylesheet/stylesheet';
 import EventStyles from '../Stylesheet/eventpagestyle';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 const EHome = ({ route }) => {
     const [selectedDate, setSelectedDate] = useState(route.params.date);
