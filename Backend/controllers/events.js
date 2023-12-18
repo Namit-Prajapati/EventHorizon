@@ -311,3 +311,34 @@ exports.getPastEvents = async (req, res) => {
     res.status(500).json({ error: "An error occurred while fetching events" });
   }
 };
+
+const updateEventStatus = async () => {
+  try {
+    const currentDate = new Date();
+    
+    // Find events whose end date has passed and status is still upcoming
+    const expiredEvents = await Event.find({
+      endDate: { $lt: currentDate },
+      status: 'upcoming',
+    });
+
+    // Update the status of expired events to 'completed'
+    if (expiredEvents.length > 0) {
+      await Promise.all(expiredEvents.map(async (event) => {
+        event.status = 'completed';
+        await event.save();
+      }));
+
+      console.log('Event statuses updated successfully.');
+    } else {
+      console.log('No events found for status update.');
+    }
+  } catch (error) {
+    console.error('Error updating event statuses:', error);
+  }
+};
+
+// updateEventStatus();
+// Run the update function periodically (e.g., every day)
+setInterval(updateEventStatus, 24 * 60 * 60 * 1000); // 24 hours in milliseconds
+
